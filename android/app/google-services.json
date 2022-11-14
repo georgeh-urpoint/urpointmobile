@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "5042694816",
+    "project_id": "ur-point",
+    "storage_bucket": "ur-point.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:5042694816:android:7a24fd751d30db9187f7c5",
+        "android_client_info": {
+          "package_name": "com.urpoint.web_view"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "5042694816-l7gfiuqm3ecap84hvhgpedriouu88dea.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgATJD0svzHCGf2-jVJuWjkfhP1Rfejtc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "5042694816-l7gfiuqm3ecap84hvhgpedriouu88dea.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "5042694816-hkgdbjv77iol0tll714s2p3b41pm21be.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.urpoint.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
