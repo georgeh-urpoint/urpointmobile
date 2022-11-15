@@ -50,6 +50,18 @@ String getPlatform(){
   return platform;
 }
 
+bool hideAppBar(){
+  bool hide;
+  var platform = getPlatform();
+  if(platform == "IOS"){
+    return false;
+  }
+  if(platform == "android"){
+    return true;
+  }
+  throw"platform not found";
+}
+
 Future<String> getUserInfo(var userid) async {
 
   // Gets the user platform
@@ -130,14 +142,10 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) =>
       Scaffold(
-        if(getPlatform() == "IOS"){
-          appBar: AppBar(
-          title: const Text("UrPoint"),
-          ),
-  }
-        if(getPlatform() == "Android"){
-          appBar: null()
-  }
+        appBar: AppBar(
+          backgroundColor: Colors.deepPurpleAccent,
+        title: Text("UrPoint")
+        ),
           body: WebView(
             //Creates WebView
             javascriptMode: JavascriptMode.unrestricted,
@@ -160,6 +168,8 @@ class _MainPageState extends State<MainPage> {
               var senderUrl = await getUserInfo(userId);
               if (url == userIdUrl && idGot == false) {
                 //Sends user data to UrPoint if the user is logging in.
+                print("check4");
+                print(senderUrl);
                 controller.loadUrl(senderUrl);
               }
             },
