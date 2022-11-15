@@ -127,8 +127,6 @@ class MyApp extends StatelessWidget {
 }
 
 class MainPage extends StatefulWidget {
-  const MainPage();
-
   @override
   _MainPageState createState() => _MainPageState();
 }
@@ -190,16 +188,16 @@ class _CameraPageState extends State<CameraPage> {
               } else {
                 final String code = barcode.rawValue!;
                 debugPrint('Barcode found! $code');
-                Navigator.push(context, MaterialPageRoute(builder: (context){
-                  return MainPage();
-                }));
-              }
-            }));
-  }
-}
+                print("context");
+                _sendLinkToMain(context, code);
 
-void _sendLinkToMain(BuildContext context) {
-  String linkToSend = 
+              }
+                }));
+            }
+  }
+
+void _sendLinkToMain(BuildContext context, code) {
+  String link = code;
 }
 
 class _MainPageState extends State<MainPage> {
