@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:is_first_run/is_first_run.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +41,7 @@ Future<void> main() async {
 }
 
 // Function to get the users platform
+// Used by UrPoint to get OneSignal notifications working.
 String getPlatform(){
   var platform;
   if (Platform.isAndroid) {
@@ -125,23 +127,103 @@ class MyApp extends StatelessWidget {
 }
 
 class MainPage extends StatefulWidget {
+  const MainPage();
+
   @override
   _MainPageState createState() => _MainPageState();
 }
 
+class CameraPage extends StatefulWidget {
+  @override
+  _CameraPageState createState() => _CameraPageState();
+}
+
+class _CameraPageState extends State<CameraPage> {
+  MobileScannerController cameraController = MobileScannerController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Mobile Scanner'),
+          actions: [
+            IconButton(
+              color: Colors.white,
+              icon: ValueListenableBuilder(
+                valueListenable: cameraController.torchState,
+                builder: (context, state, child) {
+                  switch (state as TorchState) {
+                    case TorchState.off:
+                      return const Icon(Icons.flash_off, color: Colors.grey);
+                    case TorchState.on:
+                      return const Icon(Icons.flash_on, color: Colors.yellow);
+                  }
+                },
+              ),
+              iconSize: 32.0,
+              onPressed: () => cameraController.toggleTorch(),
+            ),
+            IconButton(
+              color: Colors.white,
+              icon: ValueListenableBuilder(
+                valueListenable: cameraController.cameraFacingState,
+                builder: (context, state, child) {
+                  switch (state as CameraFacing) {
+                    case CameraFacing.front:
+                      return const Icon(Icons.camera_front);
+                    case CameraFacing.back:
+                      return const Icon(Icons.camera_rear);
+                  }
+                },
+              ),
+              iconSize: 32.0,
+              onPressed: () => cameraController.switchCamera(),
+            ),
+          ],
+        ),
+        body: MobileScanner(
+            allowDuplicates: false,
+            controller: cameraController,
+            onDetect: (barcode, args) {
+              if (barcode.rawValue == null) {
+                debugPrint('Failed to scan Barcode');
+              } else {
+                final String code = barcode.rawValue!;
+                debugPrint('Barcode found! $code');
+                Navigator.push(context, MaterialPageRoute(builder: (context){
+                  return MainPage();
+                }));
+              }
+            }));
+  }
+}
+
+void _sendLinkToMain(BuildContext context) {
+  String linkToSend = 
+}
 
 class _MainPageState extends State<MainPage> {
   late WebViewController controller;
+
   bool idGot = false;
+
 
   get homeUrl => 'https://www.ur-point.com/index.php';
 
   get userIdUrl => 'https://www.ur-point.com/firestore.php';
 
+
   //Webview
   @override
   Widget build(BuildContext context) =>
       Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return CameraPage();
+            }));
+          },
+        ),
         appBar: AppBar(
           backgroundColor: Colors.deepPurpleAccent,
         title: Text("UrPoint")
@@ -174,5 +256,6 @@ class _MainPageState extends State<MainPage> {
               }
             },
           )
+
       );
 }
