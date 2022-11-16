@@ -9,6 +9,9 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:is_first_run/is_first_run.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart';
+
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
