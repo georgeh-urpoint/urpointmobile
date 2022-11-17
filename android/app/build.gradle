@@ -29,7 +29,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('/Users/andrewhudson/Documents/GitHub/UrPointMobile/androidkey.properties')
+def keystorePropertiesFile = rootProject.file('key.properties')
 if (keystorePropertiesFile.exists()) {
    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
@@ -65,7 +65,7 @@ android {
        release {
            keyAlias keystoreProperties['upload']
            keyPassword keystoreProperties['aquaisuseless']
-           storeFile keystoreProperties['/Users/andrewhudson/upload-keystore.jks'] ? file(keystoreProperties['/Users/andrewhudson/upload-keystore.jks']) : null
+           storeFile keystoreProperties['key.jks'] ? file(keystoreProperties['key.jks']) : null
            storePassword keystoreProperties['aquaisuseless']
        }
         }

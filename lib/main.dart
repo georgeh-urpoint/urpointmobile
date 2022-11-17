@@ -21,8 +21,6 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options:
-  DefaultFirebaseOptions.currentPlatform);
   //Runs webview.
   runApp(MyApp());
 
@@ -193,7 +191,7 @@ class _CameraPageState extends State<CameraPage> {
                 debugPrint('Barcode found! $code');
                 print("context");
                 _sendLinkToMain(context, code);
-
+                Navigator.push(context, new MaterialPageRoute(builder: (context) => new MainPage()));
               }
                 }));
             }
@@ -207,6 +205,8 @@ class _MainPageState extends State<MainPage> {
   late WebViewController controller;
 
   bool idGot = false;
+
+
 
 
   get homeUrl => 'https://www.ur-point.com/index.php';
