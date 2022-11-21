@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,10 +7,9 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'dart:convert';
-import 'package:is_first_run/is_first_run.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:provider/provider.dart';
-
+import 'package:flutter/services.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 
 Future<void> main() async {
@@ -35,13 +33,7 @@ Future<void> main() async {
 
   var platform = getPlatform();
   print("platform is $platform");
-  //Saves user data to phone local storage.
-  SharedPreferences prefs = await  SharedPreferences.getInstance();
-  bool res = prefs.containsKey('userdata');
-  bool firstRun = await IsFirstRun.isFirstRun();
-  if(firstRun == false) {
-    var data = prefs.getString('userdata');
-  }
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 }
 
 // Function to get the users platform
@@ -57,7 +49,6 @@ String getPlatform(){
 }
 
 bool hideAppBar(){
-  bool hide;
   var platform = getPlatform();
   if(platform == "IOS"){
     return false;
@@ -126,13 +117,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(colorSchemeSeed: Colors.blue),
-        home: MainPage(),
+        home: MainPage(isQR: false, link: 'https://www.ur-point.com/index.php',),
       );
 }
 
 class MainPage extends StatefulWidget {
+  late final link;
+  late final isQR;
+
+  MainPage({required this.isQR, this.link});
   @override
-  _MainPageState createState() => _MainPageState();
+  _MainPageState createState() {
+    return _MainPageState();
+  }
 }
 
 class CameraPage extends StatefulWidget {
@@ -193,44 +190,63 @@ class _CameraPageState extends State<CameraPage> {
                 final String code = barcode.rawValue!;
                 debugPrint('Barcode found! $code');
                 print("context");
-                _sendLinkToMain(context, code);
-                Navigator.push(context, new MaterialPageRoute(builder: (context) => new MainPage()));
+                if(code.contains(new RegExp(r'www.ur-point.com/', caseSensitive: false))) {
+                  Navigator.push(context, new MaterialPageRoute(
+                      builder: (context) => new MainPage(
+                          isQR: true, link: code)));
+                }
               }
                 }));
             }
   }
 
-void _sendLinkToMain(BuildContext context, code) {
-  String link = code;
-}
-
 class _MainPageState extends State<MainPage> {
+  final qrKey = GlobalKey();
+
   late WebViewController controller;
 
   bool idGot = false;
+  bool loaded = false;
 
-
-
+  late String currentUrl;
 
   get homeUrl => 'https://www.ur-point.com/index.php';
 
   get userIdUrl => 'https://www.ur-point.com/firestore.php';
+
+  get link => widget.link;
 
 
   //Webview
   @override
   Widget build(BuildContext context) =>
       Scaffold(
+        appBar: AppBar(
+          title: Image.asset('assets/urpointlogo.png', fit: BoxFit.cover),
+          centerTitle: true,
+          backgroundColor: Colors.deepPurple,
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                print("qr here");
+                Navigator.push(context, new MaterialPageRoute(builder: (context) {
+                  return QrPage(currentUrl);
+                }));
+              },
+              child: Text("QR Code"),
+
+            )
+          ],
+        ),
+
         floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.deepPurple,
+          child: Icon(Icons.add),
           onPressed: () {
             Navigator.push(context, MaterialPageRoute(builder: (context) {
               return CameraPage();
             }));
           },
-        ),
-        appBar: AppBar(
-          backgroundColor: Colors.deepPurpleAccent,
-        title: Text("UrPoint")
         ),
           body: WebView(
             //Creates WebView
@@ -241,9 +257,18 @@ class _MainPageState extends State<MainPage> {
             },
 
             onPageStarted: (url) async {
+              currentUrl = url;
               print(idGot);
+              print("link is $link");
+              if (widget.isQR == true && loaded == false){
+                controller.loadUrl(link);
+                loaded = true;
+              }
               if (url == homeUrl && idGot == false) {
                 controller.loadUrl(userIdUrl);
+              }
+              if(url.contains(new RegExp(r'www.ur-point.com/ur-photo-booth', caseSensitive: false))){
+
               }
             },
             onPageFinished: (url) async {
@@ -262,4 +287,67 @@ class _MainPageState extends State<MainPage> {
           )
 
       );
+}
+
+class QrPage extends StatelessWidget {
+  late final url;
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: GenerateQRPage(),
+    );
+  }
+}
+class GenerateQRPage extends StatefulWidget {
+  @override
+  _GenerateQRPageState createState() => _GenerateQRPageState();
+}
+class _GenerateQRPageState extends State<GenerateQRPage> {
+  TextEditingController controller = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('QR GENERATOR'),
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              QrImage(
+                data: controller.text,
+                size: 300,
+                embeddedImage: AssetImage('assets/urpointlogo.png'),
+                embeddedImageStyle: QrEmbeddedImageStyle(
+                    size: Size(80,80)
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.all(20),
+                child: TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(), labelText: 'Enter URL'),
+                ),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                    });
+                  },
+                  child: Text('GENERATE QR')),
+
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
