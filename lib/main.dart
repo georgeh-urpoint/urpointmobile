@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -10,7 +12,11 @@ import 'dart:convert';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-
+import 'package:gallery_saver/gallery_saver.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:share_plus/share_plus.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -201,7 +207,6 @@ class _CameraPageState extends State<CameraPage> {
   }
 
 class _MainPageState extends State<MainPage> {
-  final qrKey = GlobalKey();
 
   late WebViewController controller;
 
@@ -230,7 +235,7 @@ class _MainPageState extends State<MainPage> {
               onPressed: () {
                 print("qr here");
                 Navigator.push(context, new MaterialPageRoute(builder: (context) {
-                  return QrPage(currentUrl);
+                  return GenerateQRPage(url: currentUrl);
                 }));
               },
               child: Text("QR Code"),
@@ -289,65 +294,128 @@ class _MainPageState extends State<MainPage> {
       );
 }
 
-class QrPage extends StatelessWidget {
+
+class GenerateQRPage extends StatefulWidget {
   late final url;
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: GenerateQRPage(),
-    );
+  GenerateQRPage({this.url});
+
+  _GenerateQRPageState createState() {
+    return _GenerateQRPageState();
   }
 }
-class GenerateQRPage extends StatefulWidget {
-  @override
-  _GenerateQRPageState createState() => _GenerateQRPageState();
-}
+
 class _GenerateQRPageState extends State<GenerateQRPage> {
   TextEditingController controller = TextEditingController();
+  final key = GlobalKey();
+
+  File? file;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('QR GENERATOR'),
+        backgroundColor: Colors.purple,
       ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              QrImage(
-                data: controller.text,
-                size: 300,
-                embeddedImage: AssetImage('assets/urpointlogo.png'),
-                embeddedImageStyle: QrEmbeddedImageStyle(
-                    size: Size(80,80)
+              RepaintBoundary(
+                key: key,
+                child: Container(
+                  child: QrImage(
+                    data: widget.url,
+                    size: 300,
+                    padding: EdgeInsets.all(16),
+                    embeddedImage: AssetImage('assets/urpointlogo.png'),
+                    embeddedImageStyle: QrEmbeddedImageStyle(
+                        size: Size(80, 80)
+                    ),
+                  ),
+                  ),
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.all(20),
-                child: TextField(
-                  controller: controller,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(), labelText: 'Enter URL'),
-                ),
-              ),
               ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                    });
-                  },
-                  child: Text('GENERATE QR')),
+                  onPressed: () async {
+                    final qrValidationResult = await QrValidator.validate(
+                      data: widget.url,
+                      version: QrVersions.auto,
+                      errorCorrectionLevel: QrErrorCorrectLevel.Q,
+                    );
 
-            ],
+                    final qrCode = await qrValidationResult.qrCode as QrCode;
+
+                    if(qrValidationResult == qrValidationResult.error){
+                      showToast("Error saving QR image, try again later.");
+                    }
+                    final painter = QrPainter.withQr(
+                      qr: qrCode,
+                      color: const Color(0xFF000000),
+                      gapless: true,
+                      embeddedImage: null,
+                      embeddedImageStyle: null,
+                    );
+
+                    final appDir = await getApplicationDocumentsDirectory();
+                    var datetime = DateTime.now();
+                    var filename = "${appDir.path}/$datetime.png";
+                    final picData = await painter.toImageData(2048, format: ImageByteFormat.png);
+                    await writeToFile(picData!, filename);
+                    final saver = await GallerySaver.saveImage(filename);
+                    showToast("QR Saved Successfully");
+                  },
+                  child: Text('Save QR Image')),
+          ]
           ),
         ),
-      ),
+      )
     );
   }
+}
+void showToast(String message){
+  Fluttertoast.showToast(
+    msg: message,
+    toastLength: Toast.LENGTH_LONG,
+    gravity: ToastGravity.BOTTOM,
+    timeInSecForIosWeb: 1,
+    backgroundColor: Colors.green,
+    textColor: Colors.white,
+    fontSize: 16.0
+  );
+}
+
+Future<void> writeToFile(ByteData data, String path) async {
+  final buffer = data.buffer;
+  await File(path).writeAsBytes(
+      buffer.asUint8List(data.offsetInBytes, data.lengthInBytes)
+  );
+}
+
+Future<String> createQrCode(String url) async {
+
+  var qrValidationResult = await QrValidator.validate(
+    data: url,
+    version: QrVersions.auto,
+    errorCorrectionLevel: QrErrorCorrectLevel.L,
+  );
+
+  QrCode qrCode = qrValidationResult.qrCode;
+
+  final painter = QrPainter.withQr(
+    qr: qrCode,
+    color: const Color(0xFF000000),
+    gapless: true,
+    embeddedImage: null,
+    embeddedImageStyle: null,
+  );
+  return path;
+}
+
+Future<String> validateQr(String url) async {
+  var qrValidationResult = await QrValidator.validate(
+    data: url,
+    version: QrVersions.auto,
+    errorCorrectionLevel: QrErrorCorrectLevel.L,
+  );
 }
