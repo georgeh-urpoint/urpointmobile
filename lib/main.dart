@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -12,11 +13,9 @@ import 'dart:convert';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:gallery_saver/gallery_saver.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -230,28 +229,27 @@ class _MainPageState extends State<MainPage> {
           title: Image.asset('assets/urpointlogo.png', fit: BoxFit.cover),
           centerTitle: true,
           backgroundColor: Colors.deepPurple,
-          actions: <Widget>[
-            TextButton(
+        ),
+        floatingActionButtonLocation: ExpandableFab.location,
+          floatingActionButton: ExpandableFab(
+          children: [
+            FloatingActionButton.small(
+                child: const Icon(Icons.add_a_photo_outlined),
+                onPressed:() {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return CameraPage();
+                  }));
+                }
+            ),
+            FloatingActionButton.small(
+              child: const Icon(Icons.add_box_rounded),
               onPressed: () {
-                print("qr here");
-                Navigator.push(context, new MaterialPageRoute(builder: (context) {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
                   return GenerateQRPage(url: currentUrl);
                 }));
               },
-              child: Text("QR Code"),
-
             )
           ],
-        ),
-
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.deepPurple,
-          child: Icon(Icons.add),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return CameraPage();
-            }));
-          },
         ),
           body: WebView(
             //Creates WebView
@@ -325,11 +323,13 @@ class _GenerateQRPageState extends State<GenerateQRPage> {
               RepaintBoundary(
                 key: key,
                 child: Container(
+                  color: Colors.white,
                   child: QrImage(
                     data: widget.url,
-                    size: 300,
+                    size: 360,
                     padding: EdgeInsets.all(16),
-                    embeddedImage: AssetImage('assets/urpointlogo.png'),
+                    backgroundColor: Colors.white,
+                    embeddedImage: AssetImage('assets/QrEmbedUrPoint.png'),
                     embeddedImageStyle: QrEmbeddedImageStyle(
                         size: Size(80, 80)
                     ),
@@ -337,35 +337,32 @@ class _GenerateQRPageState extends State<GenerateQRPage> {
                   ),
                 ),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple
+                ),
                   onPressed: () async {
-                    final qrValidationResult = await QrValidator.validate(
-                      data: widget.url,
-                      version: QrVersions.auto,
-                      errorCorrectionLevel: QrErrorCorrectLevel.Q,
-                    );
+                    RenderRepaintBoundary boundary =
+                      key.currentContext?.findRenderObject() as RenderRepaintBoundary;
+                    var image = await boundary.toImage();
+                    ByteData byteData = await image.toByteData(format: ImageByteFormat.png) as ByteData;
+                    Uint8List pngBytes = byteData.buffer.asUint8List();
 
-                    final qrCode = await qrValidationResult.qrCode as QrCode;
-
-                    if(qrValidationResult == qrValidationResult.error){
-                      showToast("Error saving QR image, try again later.");
-                    }
-                    final painter = QrPainter.withQr(
-                      qr: qrCode,
-                      color: const Color(0xFF000000),
-                      gapless: true,
-                      embeddedImage: null,
-                      embeddedImageStyle: null,
-                    );
-
-                    final appDir = await getApplicationDocumentsDirectory();
-                    var datetime = DateTime.now();
-                    var filename = "${appDir.path}/$datetime.png";
-                    final picData = await painter.toImageData(2048, format: ImageByteFormat.png);
-                    await writeToFile(picData!, filename);
-                    final saver = await GallerySaver.saveImage(filename);
+                    final tempDir = await getTemporaryDirectory();
+                    final file = await new File('${tempDir.path}/image.png').create();
+                    await file.writeAsBytes(pngBytes);
                     showToast("QR Saved Successfully");
                   },
-                  child: Text('Save QR Image')),
+                  child: Text('Save QR Invite')),
+              ElevatedButton(
+                  onPressed: () async {
+                    RenderRepaintBoundary boundary =
+                      key.currentContext?.findRenderObject() as RenderRepaintBoundary;
+                    var image = await boundary.toImage();
+                    final tempDir = await getTemporaryDirectory();
+                    var path = XFile('${tempDir.path}/image.png');
+                    Share.shareXFiles([path], text: "You have been invited to join my photo booth on UrPoint. Click the link or scan the QR code to join. ${widget.url}");
+                  },
+                  child: Text('Share QR Invite'))
           ]
           ),
         ),
@@ -400,22 +397,27 @@ Future<String> createQrCode(String url) async {
     errorCorrectionLevel: QrErrorCorrectLevel.L,
   );
 
-  QrCode qrCode = qrValidationResult.qrCode;
+  QrCode qrCode = await qrValidationResult.qrCode as QrCode;
 
-  final painter = QrPainter.withQr(
-    qr: qrCode,
-    color: const Color(0xFF000000),
-    gapless: true,
-    embeddedImage: null,
-    embeddedImageStyle: null,
-  );
+  var painter = await paintQr(url);
+
+  final appDir = await getTemporaryDirectory();
+  String tempPath = appDir.path;
+  var time = DateTime.now();
+  String path = '$tempPath/$time.png';
+  var picData = await painter.toImageData(2048, format: ImageByteFormat.png);
+  if(picData != null){
+    print("$picData is here");
+    writeToFile(picData, path);
+  }
   return path;
 }
 
-Future<String> validateQr(String url) async {
-  var qrValidationResult = await QrValidator.validate(
+Future<QrPainter> paintQr(String url) async {
+  final painter = await QrPainter(
     data: url,
     version: QrVersions.auto,
-    errorCorrectionLevel: QrErrorCorrectLevel.L,
   );
+  return painter;
 }
+
