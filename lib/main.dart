@@ -17,7 +17,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
+//Program script imports
+import 'package:web_view/LoginPage.dart';
+import 'package:web_view/ProfilePage.dart';
+
 Future<void> main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
 
   //Initialising Firebase.
@@ -29,6 +34,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Runs webview.
   runApp(MyApp());
+
+  var loginStatus = checkLogInStatus();
 
   //Initialising OneSignal
   OneSignal.shared.setAppId("bb459789-7bb7-46cf-b712-15f6ecd564d9");
@@ -43,6 +50,18 @@ Future<void> main() async {
 
 // Function to get the users platform
 // Used by UrPoint to get OneSignal notifications working.
+Future<bool> checkLogInStatus() async{
+  bool login = false;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var check = prefs.containsKey('userdata');
+  if(check == false){
+    login = false;
+  } else{
+    login = true;
+  }
+  return login;
+}
+
 String getPlatform(){
   var platform;
   if (Platform.isAndroid) {
@@ -87,15 +106,12 @@ Future<String> getUserInfo(var userid) async {
   if(playerId == null){
     playerId = "null";
   }
-  var user = User(playerId, platform, userid);
+  var user = User(playerId, platform, userid, null);
   var usermap = user.toMap();
 
-  // Saves user info to users  local storage
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  var data = json.encode(usermap);
-  prefs.setString('userdata', data);
   //Generates URL to send info to UrPoint website.
   var url = "https://www.ur-point.com/firestore.php?userid=$userid&platform=$platform&playerid=$playerId";
+  print("get url here $url");
   return url;
 }
 
@@ -103,8 +119,9 @@ class User {
   String player_id;
   String platform;
   String userId;
+  String? userName;
   //constructor
-  User(this.player_id, this.platform, this.userId);
+  User(this.player_id, this.platform, this.userId, this.userName);
 
   //Formats user data to be saved to local user storage.
   Map<String, String> toMap() {
@@ -116,14 +133,64 @@ class User {
   }
 }
 
+Future<Widget> getInfo () async{
+  var login = await checkLogInStatus();
+  if(login == false){
+    return LoginPage();
+  } else{
+    return MainPage(isQR: false,);
+  }
+  return MainPage(isQR: false,);
+}
+
 
 class MyApp extends StatelessWidget {
+
   @override
-  Widget build(BuildContext context) => MaterialApp(
+  Widget build(BuildContext context) {
+    return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(colorSchemeSeed: Colors.blue),
-        home: MainPage(isQR: false, link: 'https://www.ur-point.com/index.php',),
+        home: LoadingPage(),
       );
+  }
+}
+
+
+
+class LoadingPage extends StatelessWidget {
+  late WebViewController controller;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: WebView(
+        javascriptMode: JavascriptMode.unrestricted,
+        initialUrl: 'https://www.ur-point.com/index.php',
+        onWebViewCreated: (controller) {
+          this.controller = controller;
+        },
+
+        onPageStarted: (url) async {
+          print("page started check");
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          var check = prefs.containsKey('userid');
+          print("check 3 $check");
+          if(check == false){
+            print("check here 1");
+            Navigator.push(context, new MaterialPageRoute(
+                builder: (context) => new LoginPage()
+          ));
+          } else{
+            print("check here 2");
+            Navigator.push(context, new MaterialPageRoute(
+                builder: (context) => new MainPage(isQR: false,)
+            ));
+          }
+          }
+      ),
+    );
+  }
+
 }
 
 class MainPage extends StatefulWidget {
@@ -205,7 +272,9 @@ class _CameraPageState extends State<CameraPage> {
             }
   }
 
+
 class _MainPageState extends State<MainPage> {
+
 
   late WebViewController controller;
 
@@ -214,17 +283,52 @@ class _MainPageState extends State<MainPage> {
 
   late String currentUrl;
 
+
   get homeUrl => 'https://www.ur-point.com/index.php';
 
   get userIdUrl => 'https://www.ur-point.com/firestore.php';
 
   get link => widget.link;
 
+  int _selectedIndex = 0;
+
+  void _onNavTapped(int index){
+    setState((){
+      _selectedIndex = index;
+    });
+  }
+
+  static List<Widget> _pages = <Widget>[
+    HomeTab(),
+    ProfilePage(),
+  ];
+
+
+
 
   //Webview
   @override
   Widget build(BuildContext context) =>
       Scaffold(
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.purple,
+          items: const<BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle),
+              label: 'Profile'
+            ),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.message),
+            label: 'Messages')
+          ],
+          currentIndex: _selectedIndex,
+          onTap: _onNavTapped,
+        ),
+        drawer: NavDrawer(),
         appBar: AppBar(
           title: Image.asset('assets/urpointlogo.png', fit: BoxFit.cover),
           centerTitle: true,
@@ -251,44 +355,10 @@ class _MainPageState extends State<MainPage> {
             )
           ],
         ),
-          body: WebView(
-            //Creates WebView
-            javascriptMode: JavascriptMode.unrestricted,
-            initialUrl: 'https://www.ur-point.com/',
-            onWebViewCreated: (controller) {
-              this.controller = controller;
-            },
-
-            onPageStarted: (url) async {
-              currentUrl = url;
-              print(idGot);
-              print("link is $link");
-              if (widget.isQR == true && loaded == false){
-                controller.loadUrl(link);
-                loaded = true;
-              }
-              if (url == homeUrl && idGot == false) {
-                controller.loadUrl(userIdUrl);
-              }
-              if(url.contains(new RegExp(r'www.ur-point.com/ur-photo-booth', caseSensitive: false))){
-
-              }
-            },
-            onPageFinished: (url) async {
-              //Gets user ID from UrPoint page.
-              var getId = await controller.runJavascriptReturningResult("document.getElementById('userid').value");
-              var userId = getId.replaceAll('"', '');
-              //Creates UrPoint URL with user id.
-              var senderUrl = await getUserInfo(userId);
-              if (url == userIdUrl && idGot == false) {
-                //Sends user data to UrPoint if the user is logging in.
-                print("check4");
-                print(senderUrl);
-                controller.loadUrl(senderUrl);
-              }
-            },
-          )
-
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _pages,
+        ),
       );
 }
 
@@ -355,9 +425,6 @@ class _GenerateQRPageState extends State<GenerateQRPage> {
                   child: Text('Save QR Invite')),
               ElevatedButton(
                   onPressed: () async {
-                    RenderRepaintBoundary boundary =
-                      key.currentContext?.findRenderObject() as RenderRepaintBoundary;
-                    var image = await boundary.toImage();
                     final tempDir = await getTemporaryDirectory();
                     var path = XFile('${tempDir.path}/image.png');
                     Share.shareXFiles([path], text: "You have been invited to join my photo booth on UrPoint. Click the link or scan the QR code to join. ${widget.url}");
@@ -391,14 +458,6 @@ Future<void> writeToFile(ByteData data, String path) async {
 
 Future<String> createQrCode(String url) async {
 
-  var qrValidationResult = await QrValidator.validate(
-    data: url,
-    version: QrVersions.auto,
-    errorCorrectionLevel: QrErrorCorrectLevel.L,
-  );
-
-  QrCode qrCode = await qrValidationResult.qrCode as QrCode;
-
   var painter = await paintQr(url);
 
   final appDir = await getTemporaryDirectory();
@@ -412,7 +471,6 @@ Future<String> createQrCode(String url) async {
   }
   return path;
 }
-
 Future<QrPainter> paintQr(String url) async {
   final painter = await QrPainter(
     data: url,
@@ -420,4 +478,90 @@ Future<QrPainter> paintQr(String url) async {
   );
   return painter;
 }
+
+class NavDrawer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          DrawerHeader(
+            child: Text(
+              'UrPoint',
+              style: TextStyle(color: Colors.white, fontSize: 25),
+            ),
+            decoration: BoxDecoration(
+                color: Colors.purple,
+                image: DecorationImage(
+                    fit: BoxFit.fill,
+                    image: AssetImage(''))),
+          ),
+          ListTile(
+            leading: Icon(Icons.home),
+            title: Text('Home'),
+            onTap: () => {},
+          ),
+          ListTile(
+            leading: Icon(Icons.account_circle),
+            title: Text('Profile'),
+            onTap: () => {Navigator.of(context).pop()},
+          ),
+          ListTile(
+            leading: Icon(Icons.settings),
+            title: Text('Settings'),
+            onTap: () => {Navigator.of(context).pop()},
+          ),
+          ListTile(
+            leading: Icon(Icons.exit_to_app),
+            title: Text('Logout'),
+            onTap: () => {Navigator.of(context).pop()},
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class HomeTab extends StatefulWidget {
+
+  @override
+  HomeTabState createState() {
+    return HomeTabState();
+  }
+}
+
+class HomeTabState extends State<HomeTab> {
+
+  late WebViewController controller;
+
+  bool isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: WebView(
+        //Creates WebView
+        javascriptMode: JavascriptMode.unrestricted,
+        initialUrl: 'https://www.ur-point.com/',
+        onWebViewCreated: (controller) {
+          this.controller = controller;
+        },
+        onPageFinished: (url) async{
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          var name = await controller.runJavascriptReturningResult("window.document.getElementsByTagName('p')[0].innerHTML;");
+          var username = name.replaceAll('"', "");
+          print("user is: $username");
+          var data = prefs.containsKey('username');
+          if(data == false){
+            print("data not detected, generating data file...");
+            prefs.setString('username', username);
+            print(prefs.getKeys());
+          }
+        },
+      ),
+    );
+  }
+}
+
 
