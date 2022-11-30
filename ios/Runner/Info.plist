@@ -45,6 +45,12 @@
 	<false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo Library Access Required to Save QR Code and Images</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access required to scan QR codes.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Location Required.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 </dict>
