@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'HomeTab.dart';
 import 'firebase_options.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +21,9 @@ import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 //Program script imports
 import 'package:web_view/LoginPage.dart';
 import 'package:web_view/ProfilePage.dart';
+import 'package:web_view/MainPage.dart';
+import 'package:web_view/HomeTab.dart' as home;
+import 'package:web_view/globals.dart' as globals;
 
 Future<void> main() async {
 
@@ -138,9 +142,9 @@ Future<Widget> getInfo () async{
   if(login == false){
     return LoginPage();
   } else{
-    return MainPage(isQR: false,);
+    return MainPage(isRedir: false,);
   }
-  return MainPage(isQR: false,);
+  return MainPage(isRedir: false,);
 }
 
 
@@ -173,7 +177,7 @@ class LoadingPage extends StatelessWidget {
         onPageStarted: (url) async {
           print("page started check");
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          var check = prefs.containsKey('userid');
+          var check = prefs.containsKey('userId');
           print("check 3 $check");
           if(check == false){
             print("check here 1");
@@ -183,7 +187,7 @@ class LoadingPage extends StatelessWidget {
           } else{
             print("check here 2");
             Navigator.push(context, new MaterialPageRoute(
-                builder: (context) => new MainPage(isQR: false,)
+                builder: (context) => new MainPage(isRedir: false,)
             ));
           }
           }
@@ -193,16 +197,6 @@ class LoadingPage extends StatelessWidget {
 
 }
 
-class MainPage extends StatefulWidget {
-  late final link;
-  late final isQR;
-
-  MainPage({required this.isQR, this.link});
-  @override
-  _MainPageState createState() {
-    return _MainPageState();
-  }
-}
 
 class CameraPage extends StatefulWidget {
   @override
@@ -265,7 +259,7 @@ class _CameraPageState extends State<CameraPage> {
                 if(code.contains(new RegExp(r'www.ur-point.com/', caseSensitive: false))) {
                   Navigator.push(context, new MaterialPageRoute(
                       builder: (context) => new MainPage(
-                          isQR: true, link: code)));
+                          isRedir: true, link: code)));
                 }
               }
                 }));
@@ -273,94 +267,6 @@ class _CameraPageState extends State<CameraPage> {
   }
 
 
-class _MainPageState extends State<MainPage> {
-
-
-  late WebViewController controller;
-
-  bool idGot = false;
-  bool loaded = false;
-
-  late String currentUrl;
-
-
-  get homeUrl => 'https://www.ur-point.com/index.php';
-
-  get userIdUrl => 'https://www.ur-point.com/firestore.php';
-
-  get link => widget.link;
-
-  int _selectedIndex = 0;
-
-  void _onNavTapped(int index){
-    setState((){
-      _selectedIndex = index;
-    });
-  }
-
-  static List<Widget> _pages = <Widget>[
-    HomeTab(),
-    ProfilePage(),
-  ];
-
-
-
-
-  //Webview
-  @override
-  Widget build(BuildContext context) =>
-      Scaffold(
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.purple,
-          items: const<BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle),
-              label: 'Profile'
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.message),
-            label: 'Messages')
-          ],
-          currentIndex: _selectedIndex,
-          onTap: _onNavTapped,
-        ),
-        drawer: NavDrawer(),
-        appBar: AppBar(
-          title: Image.asset('assets/urpointlogo.png', fit: BoxFit.cover),
-          centerTitle: true,
-          backgroundColor: Colors.deepPurple,
-        ),
-        floatingActionButtonLocation: ExpandableFab.location,
-          floatingActionButton: ExpandableFab(
-          children: [
-            FloatingActionButton.small(
-                child: const Icon(Icons.add_a_photo_outlined),
-                onPressed:() {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return CameraPage();
-                  }));
-                }
-            ),
-            FloatingActionButton.small(
-              child: const Icon(Icons.add_box_rounded),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return GenerateQRPage(url: currentUrl);
-                }));
-              },
-            )
-          ],
-        ),
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: _pages,
-        ),
-      );
-}
 
 
 class GenerateQRPage extends StatefulWidget {
@@ -376,6 +282,7 @@ class GenerateQRPage extends StatefulWidget {
 class _GenerateQRPageState extends State<GenerateQRPage> {
   TextEditingController controller = TextEditingController();
   final key = GlobalKey();
+
 
   File? file;
   @override
@@ -498,24 +405,66 @@ class NavDrawer extends StatelessWidget {
                     image: AssetImage(''))),
           ),
           ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Home'),
-            onTap: () => {},
+            leading: Icon(Icons.photo_camera_front),
+            title: Text('Photo Booth'),
+            onTap: () => {
+              globals.currentLink = 'https://www.ur-point.com/ur-photo-booth',
+              print(globals.currentLink),
+              Navigator.pop(context),
+            },
           ),
           ListTile(
-            leading: Icon(Icons.account_circle),
-            title: Text('Profile'),
-            onTap: () => {Navigator.of(context).pop()},
+            leading: Icon(Icons.photo_album),
+            title: Text('Photos'),
+            onTap: () => {
+              globals.currentLink = 'https://www.ur-point.com/ur-photo-booth',
+              print(globals.currentLink),
+              Navigator.pop(context),
+            },
           ),
           ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
-            onTap: () => {Navigator.of(context).pop()},
+            leading: Icon(Icons.video_collection),
+            title: Text('Videos'),
+            onTap: () => {
+              globals.currentLink = 'https://www.ur-point.com/ur-videos',
+              print(globals.currentLink),
+              Navigator.pop(context)
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.business_center),
+            title: Text('Business'),
+            onTap: () => {
+              Navigator.pop(context)
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.group),
+            title: Text('Groups'),
+            onTap: () => {
+              Navigator.pop(context)
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.event),
+            title: Text('Events'),
+            onTap: () => {
+              Navigator.pop(context)
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.card_giftcard),
+            title: Text('Cards'),
+            onTap: () => {
+              Navigator.pop(context)
+            },
           ),
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
-            onTap: () => {Navigator.of(context).pop()},
+            onTap: () => {
+              Navigator.pop(context)
+            },
           ),
         ],
       ),
@@ -523,45 +472,6 @@ class NavDrawer extends StatelessWidget {
   }
 }
 
-class HomeTab extends StatefulWidget {
 
-  @override
-  HomeTabState createState() {
-    return HomeTabState();
-  }
-}
-
-class HomeTabState extends State<HomeTab> {
-
-  late WebViewController controller;
-
-  bool isLoading = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: WebView(
-        //Creates WebView
-        javascriptMode: JavascriptMode.unrestricted,
-        initialUrl: 'https://www.ur-point.com/',
-        onWebViewCreated: (controller) {
-          this.controller = controller;
-        },
-        onPageFinished: (url) async{
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          var name = await controller.runJavascriptReturningResult("window.document.getElementsByTagName('p')[0].innerHTML;");
-          var username = name.replaceAll('"', "");
-          print("user is: $username");
-          var data = prefs.containsKey('username');
-          if(data == false){
-            print("data not detected, generating data file...");
-            prefs.setString('username', username);
-            print(prefs.getKeys());
-          }
-        },
-      ),
-    );
-  }
-}
 
 

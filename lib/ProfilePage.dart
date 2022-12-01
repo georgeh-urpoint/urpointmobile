@@ -9,6 +9,8 @@ import 'package:is_first_run/is_first_run.dart';
 
 import 'main.dart';
 
+
+
 class ProfilePage extends StatefulWidget {
   @override
   _ProfilePageState createState() {
@@ -19,31 +21,38 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
 
-  late var username = getUserName();
+
+  Future<String> getUserName() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String _username = await prefs.getString('username').toString();
+    return _username;
+  }
 
   bool idGot = false;
+
   bool loaded = false;
 
-  get userIdUrl => 'https://www.ur-point.com/firestore.php';
-
   late WebViewController controller;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: WebView(
           javascriptMode: JavascriptMode.unrestricted,
-          initialUrl: 'https://www.ur-point.com/$username',
-          onWebViewCreated: (controller) {
+          initialUrl: 'https://www.ur-point.com',
+          onWebViewCreated: (controller) async {
+            var username = await getUserName();
+            print(username);
             this.controller = controller;
+            controller.loadUrl('https://www.ur-point.com/$username');
+          },
+          onPageFinished: (String url) {
+            print('Page finished loading: $url');
+            controller.runJavascript(
+                "document.getElementsByTagName('header')[0].style.display='none'");
+            controller.runJavascript(
+                "document.getElementsByTagName('footer')[0].style.display='none'");
           },
         )
     );
   }
-}
-
-Future<String?> getUserName() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  var username = prefs.getString('username');
-  return username;
 }

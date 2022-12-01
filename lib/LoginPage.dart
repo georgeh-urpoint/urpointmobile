@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'MainPage.dart';
 import 'main.dart';
 
 class LoginPage extends StatefulWidget {
@@ -48,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
           if(url == 'https://www.ur-point.com/index.php' && idGot == true) {
             print("pushing to main page");
             Navigator.push(context, new MaterialPageRoute(
-                builder: (context) => new MainPage(isQR: false,))
+                builder: (context) => new MainPage(isRedir: false,))
             );
           }
         },
@@ -67,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
             idGot = true;
             print("id got: $idGot");
             Navigator.push(context, new MaterialPageRoute(
-                builder: (context) => new MainPage(isQR: false,))
+                builder: (context) => new MainPage(isRedir: false,))
             );
           }
         },
