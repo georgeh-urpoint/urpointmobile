@@ -5,25 +5,20 @@ import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'HomeTab.dart';
 import 'firebase_options.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
-import 'dart:convert';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
 //Program script imports
 import 'package:web_view/LoginPage.dart';
-import 'package:web_view/ProfilePage.dart';
 import 'package:web_view/MainPage.dart';
-import 'package:web_view/HomeTab.dart' as home;
 import 'package:web_view/globals.dart' as globals;
+import 'autoloadglobals.dart' as autoload;
 
 Future<void> main() async {
 
@@ -39,8 +34,6 @@ Future<void> main() async {
   //Runs webview.
   runApp(MyApp());
 
-  var loginStatus = checkLogInStatus();
-
   //Initialising OneSignal
   OneSignal.shared.setAppId("bb459789-7bb7-46cf-b712-15f6ecd564d9");
   OneSignal.shared.promptUserForPushNotificationPermission().then((accepted) {
@@ -54,17 +47,6 @@ Future<void> main() async {
 
 // Function to get the users platform
 // Used by UrPoint to get OneSignal notifications working.
-Future<bool> checkLogInStatus() async{
-  bool login = false;
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  var check = prefs.containsKey('userdata');
-  if(check == false){
-    login = false;
-  } else{
-    login = true;
-  }
-  return login;
-}
 
 String getPlatform(){
   var platform;
@@ -110,8 +92,6 @@ Future<String> getUserInfo(var userid) async {
   if(playerId == null){
     playerId = "null";
   }
-  var user = User(playerId, platform, userid, null);
-  var usermap = user.toMap();
 
   //Generates URL to send info to UrPoint website.
   var url = "https://www.ur-point.com/firestore.php?userid=$userid&platform=$platform&playerid=$playerId";
@@ -126,25 +106,15 @@ class User {
   String? userName;
   //constructor
   User(this.player_id, this.platform, this.userId, this.userName);
-
-  //Formats user data to be saved to local user storage.
-  Map<String, String> toMap() {
-    return {
-      "player_id": player_id,
-      "platform": platform,
-      "userId" : userId
-    };
-  }
 }
 
 Future<Widget> getInfo () async{
-  var login = await checkLogInStatus();
+  var login = await autoload.autoLoad();
   if(login == false){
     return LoginPage();
   } else{
     return MainPage(isRedir: false,);
   }
-  return MainPage(isRedir: false,);
 }
 
 
@@ -170,27 +140,21 @@ class LoadingPage extends StatelessWidget {
       body: WebView(
         javascriptMode: JavascriptMode.unrestricted,
         initialUrl: 'https://www.ur-point.com/index.php',
-        onWebViewCreated: (controller) {
+        onWebViewCreated: (controller) async {
+          print("loading webview created");
           this.controller = controller;
-        },
-
-        onPageStarted: (url) async {
-          print("page started check");
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          var check = prefs.containsKey('userId');
-          print("check 3 $check");
-          if(check == false){
-            print("check here 1");
-            Navigator.push(context, new MaterialPageRoute(
+          var check = await autoload.loadData();
+          print("Login Status: $check");
+          if(check == false) {
+            Navigator.pushReplacement(context, new MaterialPageRoute(
                 builder: (context) => new LoginPage()
-          ));
+            ));
           } else{
-            print("check here 2");
-            Navigator.push(context, new MaterialPageRoute(
+            Navigator.pushReplacement(context, new MaterialPageRoute(
                 builder: (context) => new MainPage(isRedir: false,)
             ));
           }
-          }
+        }
       ),
     );
   }
@@ -257,7 +221,7 @@ class _CameraPageState extends State<CameraPage> {
                 debugPrint('Barcode found! $code');
                 print("context");
                 if(code.contains(new RegExp(r'www.ur-point.com/', caseSensitive: false))) {
-                  Navigator.push(context, new MaterialPageRoute(
+                  Navigator.pushReplacement(context, new MaterialPageRoute(
                       builder: (context) => new MainPage(
                           isRedir: true, link: code)));
                 }
@@ -387,6 +351,7 @@ Future<QrPainter> paintQr(String url) async {
 }
 
 class NavDrawer extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -395,9 +360,13 @@ class NavDrawer extends StatelessWidget {
         children: <Widget>[
           DrawerHeader(
             child: Text(
-              'UrPoint',
-              style: TextStyle(color: Colors.white, fontSize: 25),
+              'Welcome to Ur Point, ${autoload.userName}',
+              style: new TextStyle(
+                fontSize: 20.0,
+                color: Colors.white
+              ),
             ),
+
             decoration: BoxDecoration(
                 color: Colors.purple,
                 image: DecorationImage(
@@ -417,8 +386,7 @@ class NavDrawer extends StatelessWidget {
             leading: Icon(Icons.photo_album),
             title: Text('Photos'),
             onTap: () => {
-              globals.currentLink = 'https://www.ur-point.com/ur-photo-booth',
-              print(globals.currentLink),
+              globals.currentLink = 'https://www.ur-point.com/ur-photos',
               Navigator.pop(context),
             },
           ),
@@ -427,7 +395,6 @@ class NavDrawer extends StatelessWidget {
             title: Text('Videos'),
             onTap: () => {
               globals.currentLink = 'https://www.ur-point.com/ur-videos',
-              print(globals.currentLink),
               Navigator.pop(context)
             },
           ),
@@ -435,6 +402,7 @@ class NavDrawer extends StatelessWidget {
             leading: Icon(Icons.business_center),
             title: Text('Business'),
             onTap: () => {
+              globals.currentLink = 'https://www.ur-point.com/ur-business',
               Navigator.pop(context)
             },
           ),
@@ -442,6 +410,7 @@ class NavDrawer extends StatelessWidget {
             leading: Icon(Icons.group),
             title: Text('Groups'),
             onTap: () => {
+              globals.currentLink = 'https://www.ur-point.com/groups',
               Navigator.pop(context)
             },
           ),
@@ -449,6 +418,7 @@ class NavDrawer extends StatelessWidget {
             leading: Icon(Icons.event),
             title: Text('Events'),
             onTap: () => {
+              globals.currentLink = 'https://www.ur-point.com/events',
               Navigator.pop(context)
             },
           ),
@@ -456,14 +426,43 @@ class NavDrawer extends StatelessWidget {
             leading: Icon(Icons.card_giftcard),
             title: Text('Cards'),
             onTap: () => {
+              globals.currentLink = 'https://www.ur-cards.com/',
               Navigator.pop(context)
             },
           ),
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
-            onTap: () => {
-              Navigator.pop(context)
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text("Really Log Out?"),
+                  content: const Text("Are you sure you want to log out? Your account details will not be saved."),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                      },
+                      child: Container(
+                        color: Colors.green,
+                        padding: const EdgeInsets.all(14),
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        autoload.logOut(context);
+                      },
+                      child: Container(
+                        color: Colors.red,
+                        padding: const EdgeInsets.all(14),
+                        child: const Text("Log Out"),
+                      ),
+                    ),
+                  ],
+                ),
+              );
             },
           ),
         ],
@@ -471,7 +470,3 @@ class NavDrawer extends StatelessWidget {
     );
   }
 }
-
-
-
-

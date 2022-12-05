@@ -1,29 +1,11 @@
-import 'dart:convert';
+import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'ProfilePage.dart';
-import 'main.dart';
-import 'MainPage.dart';
 import 'globals.dart' as globals;
 import 'events.dart';
-import 'package:flutter/services.dart';
-
-typedef void Listener(String);
-typedef void CancelListening();
-
-
-CancelListening startListening(Listener listener) {
-  var subscription = channel.receiveBroadcastStream(
-  ).listen(listener, cancelOnError: true);
-  return () {
-    subscription.cancel();
-  };
-}
+import 'autoloadglobals.dart' as autoload;
 
 
 void changeUrl(bool, link) {
@@ -44,88 +26,79 @@ class HomeTab extends StatefulWidget {
 
 class HomeTabState extends State<HomeTab> {
 
-
-
-  var initLink;
-
-
-  ValueNotifier<String> linkCheck = ValueNotifier(globals.currentLink);
+  final homeUrl = 'https://www.ur-point.com/';
+  var currentUrl;
 
   late WebViewController controller;
 
   bool isLoading = false;
 
+
   @override
 
   Widget build(BuildContext context) {
 
-    if(widget.isRedir == true){
-      initLink = widget.link;
-    } else{
-      initLink = "https://www.ur-point.com/";
+    void updateUrl() {
+      if(globals.refresh == true){
+        globals.refresh = false;
+        controller.loadUrl(homeUrl);
+      }
+      if (currentUrl != globals.currentLink) {
+        print("LOADING");
+        controller.loadUrl(globals.currentLink);
+        currentUrl = globals.currentLink;
+      }
     }
 
-    ValueListenableBuilder<String>(
-      valueListenable: linkCheck,
-      builder: (context, value, child) {
-        controller.loadUrl(globals.currentLink);
-        print("url seen");
-        throw "";
-      }
-    );
+    var timer = Timer.periodic(Duration(seconds: 1), (Timer t) => updateUrl());
 
-
-
-
-    return Stack(
-      children: [
-        ValueListenableBuilder<String>(
-            valueListenable: linkCheck,
-            builder: (context, value, child) {
-              controller.loadUrl(globals.currentLink);
-              print("url seen");
-              throw "";
-            }
-        ),
-        WebView(
+    return Scaffold(
+        body: WebView(
         //Creates WebView
         javascriptMode: JavascriptMode.unrestricted,
-        initialUrl: initLink,
+        initialUrl: homeUrl,
         onWebViewCreated: (controller) {
-
-          print("check here for ${linkCheck.hasListeners}");
           this.controller = controller;
           if(widget.isRedir == true){
             print("load qr");
             controller.loadUrl(widget.link);
           }
+          globals.currentLink = homeUrl;
+          currentUrl = homeUrl;
         },
         onPageFinished: (url) async {
+          print(url);
           controller.runJavascript(
               "document.getElementsByTagName('header')[0].style.display='none'");
           controller.runJavascript(
               "document.getElementsByTagName('footer')[0].style.display='none'");
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          var name = await controller.runJavascriptReturningResult("window.document.getElementsByTagName('p')[0].innerHTML;");
-          var username = name.replaceAll(RegExp('["@]'), '');
-          print("user is: $username");
-          var data = prefs.containsKey('username');
-          if(data == false){
+          var data = prefs.getString('username');
+          print(prefs.getKeys());
+          print("username is: $data");
+          print("Login Data $data");
+          if(data == null){
             print("data not detected, generating data file...");
+            var name = await controller.runJavascriptReturningResult("window.document.getElementsByTagName('p')[0].innerHTML;");
+            var username = name.replaceAll(RegExp('["@]'), '');
+            print("user is: $username");
             prefs.setString('username', username);
             print(prefs.getKeys());
             print("username saved as: ${prefs.getString('username')}");
           }
         },
         onPageStarted: (url) {
+          if(url == 'https://www.ur-cards.com/'){
+            autoload.isOnCards = Colors.blue;
+          }
+          globals.currentLink = url;
           controller.runJavascript(
               "document.getElementsByTagName('header')[0].style.display='none'");
           controller.runJavascript(
               "document.getElementsByTagName('footer')[0].style.display='none'");
         },
+          onProgress: ,
       ),
-    ]
     );
-
 }
 }

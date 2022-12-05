@@ -1,13 +1,12 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'ProfilePage.dart';
 import 'main.dart';
 import 'HomeTab.dart' as home;
+import 'globals.dart' as globals;
+import 'autoloadglobals.dart' as autoload;
 
 class MainPage extends StatefulWidget {
   final link;
@@ -30,7 +29,7 @@ class _MainPageState extends State<MainPage> {
   bool idGot = false;
   bool loaded = false;
 
-  late String currentUrl;
+  var currentUrl;
 
 
   get homeUrl => 'https://www.ur-point.com/index.php';
@@ -42,6 +41,9 @@ class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
 
   void _onNavTapped(int index){
+    if(_selectedIndex == 0 && index == 0){
+      globals.refresh = true;
+    }
     setState((){
       _selectedIndex = index;
     });
@@ -53,6 +55,10 @@ class _MainPageState extends State<MainPage> {
 
     List<Widget> _pages = <Widget>[
       home.HomeTab(isRedir: widget.isRedir, link: 'https://www.ur-point.com/index.php',),
+      Icon(
+        Icons.account_circle,
+        size: 150,
+      ),
       ProfilePage(),
     ];
 
@@ -65,12 +71,12 @@ class _MainPageState extends State<MainPage> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle),
-              label: 'Profile'
+              icon: Icon(Icons.message),
+              label: 'Messages'
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.message),
-              label: 'Messages')
+              icon: Icon(Icons.account_circle),
+              label: 'Profile')
         ],
         currentIndex: _selectedIndex,
         onTap: _onNavTapped,
@@ -79,7 +85,7 @@ class _MainPageState extends State<MainPage> {
       appBar: AppBar(
         title: Image.asset('assets/urpointlogo.png', fit: BoxFit.cover),
         centerTitle: true,
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: autoload.isOnCards,
       ),
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
@@ -96,7 +102,7 @@ class _MainPageState extends State<MainPage> {
             child: const Icon(Icons.add_box_rounded),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return GenerateQRPage(url: currentUrl);
+                return GenerateQRPage(url: globals.currentLink);
               }));
             },
           )
@@ -110,3 +116,4 @@ class _MainPageState extends State<MainPage> {
   }
 
 }
+

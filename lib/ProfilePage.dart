@@ -1,15 +1,12 @@
-import 'dart:convert';
+
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:is_first_run/is_first_run.dart';
+import 'autoloadglobals.dart' as globals;
 
-import 'main.dart';
-
-
+var userName = globals.userName;
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -21,13 +18,6 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
 
-
-  Future<String> getUserName() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String _username = await prefs.getString('username').toString();
-    return _username;
-  }
-
   bool idGot = false;
 
   bool loaded = false;
@@ -38,12 +28,10 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
         body: WebView(
           javascriptMode: JavascriptMode.unrestricted,
-          initialUrl: 'https://www.ur-point.com',
+          initialUrl: 'https://www.ur-point.com/$userName',
           onWebViewCreated: (controller) async {
-            var username = await getUserName();
-            print(username);
             this.controller = controller;
-            controller.loadUrl('https://www.ur-point.com/$username');
+            controller.loadUrl('https://www.ur-point.com/$userName');
           },
           onPageFinished: (String url) {
             print('Page finished loading: $url');

@@ -1,8 +1,8 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web_view/autoloadglobals.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'MainPage.dart';
 import 'main.dart';
@@ -26,6 +26,8 @@ class _LoginPageState extends State<LoginPage> {
 
   get userIdUrl => 'https://www.ur-point.com/firestore.php';
 
+  late CookieManager cookieManager;
+
   late WebViewController controller;
   @override
   Widget build(BuildContext context) {
@@ -35,6 +37,9 @@ class _LoginPageState extends State<LoginPage> {
         javascriptMode: JavascriptMode.unrestricted,
         initialUrl: 'https://www.ur-point.com/holding.php',
         onWebViewCreated: (controller) {
+          this.cookieManager = CookieManager();
+          cookieManager.clearCookies();
+          print("cookies cleared.");
           this.controller = controller;
         },
 
@@ -42,13 +47,13 @@ class _LoginPageState extends State<LoginPage> {
           currentUrl = url;
           print(idGot);
           print("url is $currentUrl");
-          if(url == homeUrl && idGot == false) {
+          if(url == 'https://www.ur-point.com/index.php' && idGot == false) {
             print("id not found, running script.");
             controller.loadUrl(userIdUrl);
           }
           if(url == 'https://www.ur-point.com/index.php' && idGot == true) {
             print("pushing to main page");
-            Navigator.push(context, new MaterialPageRoute(
+            Navigator.pushReplacement(context, new MaterialPageRoute(
                 builder: (context) => new MainPage(isRedir: false,))
             );
           }
@@ -67,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
             controller.loadUrl(senderUrl);
             idGot = true;
             print("id got: $idGot");
-            Navigator.push(context, new MaterialPageRoute(
+            Navigator.pushReplacement(context, new MaterialPageRoute(
                 builder: (context) => new MainPage(isRedir: false,))
             );
           }
@@ -109,5 +114,6 @@ Future<String> getUserInfo(var userid) async {
   prefs.setString('userId', userid);
   //Generates URL to send info to UrPoint website.
   var url = "https://www.ur-point.com/firestore.php?userid=$userid&platform=$platform&playerid=$playerId";
+  prefs.setBool('loggedIn', true);
   return url;
 }
