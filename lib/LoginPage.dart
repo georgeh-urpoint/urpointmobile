@@ -6,6 +6,7 @@ import 'package:web_view/autoloadglobals.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'MainPage.dart';
 import 'main.dart';
+import 'autoloadglobals.dart' as auto;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -59,11 +60,18 @@ class _LoginPageState extends State<LoginPage> {
           }
         },
         onPageFinished: (url) async {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
           if (url == userIdUrl && idGot == false) {
             //Gets user ID from UrPoint page.
             var getId = await controller.runJavascriptReturningResult("document.getElementById('userid').value");
-            print("go here $getId");
+            var getUser = await controller.runJavascriptReturningResult("document.getElementById('username').value");
             var userId = getId.replaceAll('"', '');
+            var userName = getUser.replaceAll('"', '');
+            auto.userName = userName;
+            auto.userId = userId;
+            print("go here $getId");
+            print("go here $getUser");
+            prefs.setString('username', userName);
             //Creates UrPoint URL with user id.
             var senderUrl = await getUserInfo(userId);
             //Sends user data to UrPoint if the user is logging in.

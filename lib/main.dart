@@ -19,6 +19,7 @@ import 'package:web_view/LoginPage.dart';
 import 'package:web_view/MainPage.dart';
 import 'package:web_view/globals.dart' as globals;
 import 'autoloadglobals.dart' as autoload;
+import 'package:web_view/HomeTab.dart' as home;
 
 Future<void> main() async {
 
@@ -108,16 +109,6 @@ class User {
   User(this.player_id, this.platform, this.userId, this.userName);
 }
 
-Future<Widget> getInfo () async{
-  var login = await autoload.autoLoad();
-  if(login == false){
-    return LoginPage();
-  } else{
-    return MainPage(isRedir: false,);
-  }
-}
-
-
 class MyApp extends StatelessWidget {
 
   @override
@@ -130,8 +121,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-
 class LoadingPage extends StatelessWidget {
   late WebViewController controller;
   @override
@@ -141,8 +130,6 @@ class LoadingPage extends StatelessWidget {
         javascriptMode: JavascriptMode.unrestricted,
         initialUrl: 'https://www.ur-point.com/index.php',
         onWebViewCreated: (controller) async {
-          print("loading webview created");
-          this.controller = controller;
           var check = await autoload.loadData();
           print("Login Status: $check");
           if(check == false) {
@@ -350,10 +337,28 @@ Future<QrPainter> paintQr(String url) async {
   return painter;
 }
 
-class NavDrawer extends StatelessWidget {
+
+class NavDrawer extends StatefulWidget {
+
+  NavDrawerState createState() {
+    return NavDrawerState();
+  }
+}
+
+class NavDrawerState extends State<NavDrawer> {
+  bool forAndroid = true;
+
+  late String labelText;
 
   @override
   Widget build(BuildContext context) {
+    if(forAndroid == true){
+      labelText = "All Posts will be Kept";
+    }
+    if(forAndroid == false){
+      labelText = 'Posts will expire after 7 days.';
+    }
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -366,7 +371,6 @@ class NavDrawer extends StatelessWidget {
                 color: Colors.white
               ),
             ),
-
             decoration: BoxDecoration(
                 color: Colors.purple,
                 image: DecorationImage(
@@ -374,7 +378,8 @@ class NavDrawer extends StatelessWidget {
                     image: AssetImage(''))),
           ),
           ListTile(
-            leading: Icon(Icons.photo_camera_front),
+            minVerticalPadding: 25,
+            leading: Image.asset('UrIcons/Ur-Photobooth-P.png', fit: BoxFit.cover),
             title: Text('Photo Booth'),
             onTap: () => {
               globals.currentLink = 'https://www.ur-point.com/ur-photo-booth',
@@ -383,7 +388,8 @@ class NavDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.photo_album),
+            minVerticalPadding: 25,
+            leading: Image.asset('UrIcons/Ur-Photos-P.png', fit: BoxFit.cover),
             title: Text('Photos'),
             onTap: () => {
               globals.currentLink = 'https://www.ur-point.com/ur-photos',
@@ -391,7 +397,8 @@ class NavDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.video_collection),
+            minVerticalPadding: 25,
+            leading: Image.asset('UrIcons/Ur-Videos-P.png', fit: BoxFit.cover),
             title: Text('Videos'),
             onTap: () => {
               globals.currentLink = 'https://www.ur-point.com/ur-videos',
@@ -399,7 +406,8 @@ class NavDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.business_center),
+            minVerticalPadding: 25,
+            leading: Image.asset('UrIcons/Ur-Business-P.png', fit: BoxFit.cover),
             title: Text('Business'),
             onTap: () => {
               globals.currentLink = 'https://www.ur-point.com/ur-business',
@@ -407,7 +415,8 @@ class NavDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.group),
+            minVerticalPadding: 25,
+            leading: Image.asset('UrIcons/Ur-Groups-P.png', fit: BoxFit.cover),
             title: Text('Groups'),
             onTap: () => {
               globals.currentLink = 'https://www.ur-point.com/groups',
@@ -415,7 +424,8 @@ class NavDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.event),
+            minVerticalPadding: 25,
+            leading: Image.asset('UrIcons/Ur-Events-P.png', fit: BoxFit.cover),
             title: Text('Events'),
             onTap: () => {
               globals.currentLink = 'https://www.ur-point.com/events',
@@ -423,7 +433,8 @@ class NavDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.card_giftcard),
+            minVerticalPadding: 25,
+            leading: Image.asset('UrIcons/Ur-Cards-P.png', fit: BoxFit.cover),
             title: Text('Cards'),
             onTap: () => {
               globals.currentLink = 'https://www.ur-cards.com/',
@@ -431,6 +442,7 @@ class NavDrawer extends StatelessWidget {
             },
           ),
           ListTile(
+            minVerticalPadding: 25,
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
             onTap: () {
@@ -465,8 +477,53 @@ class NavDrawer extends StatelessWidget {
               );
             },
           ),
+          Container(
+            width: 42.0,
+            height: 120.0,
+            child: DecoratedBox(
+              decoration: BoxDecoration(border:
+              Border.all(color: Colors.black),
+                  color: Colors.white
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('data')
+                      ],
+                    ),
+                  ),
+                  Switch(
+                      activeColor: Colors.purple,
+                      activeTrackColor: Colors.black,
+                      inactiveThumbColor: Colors.purple,
+                      inactiveTrackColor: Colors.black26,
+                      splashRadius: 50.0,
+                      // boolean variable value
+                      value: forAndroid,
+                      // changes the state of the switch
+                      onChanged: (value) {
+                        setState(() {
+                          forAndroid = value;
+                          print('changed storage to $value');
+                        });
+                      }
+                  ),
+                  Text(labelText,
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              )
+            )
+          ),
         ],
       ),
     );
   }
 }
+

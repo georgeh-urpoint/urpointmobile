@@ -24,9 +24,7 @@ dependencies:
   http: ^0.13.5
   mobile_scanner: ^2.0.0
   provider: ^6.0.4
-  flutter_statusbar_manager: ^2.0.0
   qr_flutter: ^4.0.0
-  gallery_saver: ^2.3.2
   fluttertoast: ^8.1.1
   path_provider: ^2.0.11
   image_picker: ^0.8.6
@@ -45,4 +43,6 @@ flutter:
   - assets/urpointlogo.png
   - assets/
   - assets/QrEmbedUrPoint.png
+  - UrIcons/
+  - assets/Bell/
   uses-material-design: true

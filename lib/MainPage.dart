@@ -7,6 +7,7 @@ import 'main.dart';
 import 'HomeTab.dart' as home;
 import 'globals.dart' as globals;
 import 'autoloadglobals.dart' as autoload;
+import 'package:web_view/MessageTab.dart' as message;
 
 class MainPage extends StatefulWidget {
   final link;
@@ -55,25 +56,97 @@ class _MainPageState extends State<MainPage> {
 
     List<Widget> _pages = <Widget>[
       home.HomeTab(isRedir: widget.isRedir, link: 'https://www.ur-point.com/index.php',),
-      Icon(
-        Icons.account_circle,
-        size: 150,
-      ),
+      message.MessageTab(),
+      Text('Notifications Page Currently Unavailable. Check back soon!'),
       ProfilePage(),
     ];
 
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.purple,
-        items: const<BottomNavigationBarItem>[
+        backgroundColor: Colors.purpleAccent,
+        selectedItemColor: Colors.purple,
+        unselectedItemColor: Colors.deepPurple,
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.message),
+              icon: new Stack(
+                  children: <Widget>[
+                    new Icon(Icons.message),
+                    globals.msgNum != 0?
+                    new Positioned(
+                      right: 0,
+                      child: new Container(
+                        padding: EdgeInsets.all(1),
+                        decoration: new BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        constraints: BoxConstraints(
+                          minWidth: 12,
+                          minHeight: 12,
+                        ),
+                        child: globals.msgNum < 9?new Text(
+                          '${globals.msgNum}',
+                          style: new TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                          textAlign: TextAlign.center,
+                        ):
+                            new Text('9+',
+                            style: new TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                            ),
+                            textAlign: TextAlign.center)
+                      ),
+                    ):
+                    SizedBox.shrink()
+                  ]
+              ),
               label: 'Messages'
           ),
+    BottomNavigationBarItem(
+      icon: new Stack(
+        children: <Widget>[
+          new Icon(Icons.notifications),
+          globals.notifNum != 0?
+          new Positioned(
+            right: 0,
+            child: new Container(
+              padding: EdgeInsets.all(1),
+              decoration: new BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              constraints: BoxConstraints(
+                minWidth: 12,
+                minHeight: 12,
+              ),
+              child: globals.notifNum < 9?new Text(
+                '${globals.notifNum}',
+                style: new TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                ),
+                textAlign: TextAlign.center,
+              ):
+              new Text('9+',
+                  style: new TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                  ),
+                  textAlign: TextAlign.center)
+            ),
+          ):
+          SizedBox.shrink()
+  ]
+      ),
+      label: 'Notifications',
+    ),
           BottomNavigationBarItem(
               icon: Icon(Icons.account_circle),
               label: 'Profile')
@@ -85,7 +158,7 @@ class _MainPageState extends State<MainPage> {
       appBar: AppBar(
         title: Image.asset('assets/urpointlogo.png', fit: BoxFit.cover),
         centerTitle: true,
-        backgroundColor: autoload.isOnCards,
+        backgroundColor: Colors.deepPurple,
       ),
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(

@@ -6,14 +6,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'autoloadglobals.dart' as globals;
 
-var userName = globals.userName;
-
 class ProfilePage extends StatefulWidget {
   @override
   _ProfilePageState createState() {
     return _ProfilePageState();
   }
-
 }
 
 class _ProfilePageState extends State<ProfilePage> {
@@ -28,10 +25,10 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
         body: WebView(
           javascriptMode: JavascriptMode.unrestricted,
-          initialUrl: 'https://www.ur-point.com/$userName',
+          initialUrl: 'https://www.ur-point.com/${globals.userName}',
           onWebViewCreated: (controller) async {
             this.controller = controller;
-            controller.loadUrl('https://www.ur-point.com/$userName');
+            controller.loadUrl('https://www.ur-point.com/${globals.userName}');
           },
           onPageFinished: (String url) {
             print('Page finished loading: $url');

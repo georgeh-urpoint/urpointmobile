@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'globals.dart' as globals;
-import 'events.dart';
 import 'autoloadglobals.dart' as autoload;
 
 
@@ -35,11 +34,14 @@ class HomeTabState extends State<HomeTab> {
 
 
   @override
-
   Widget build(BuildContext context) {
 
+    void changeStorage(){
+      controller.runJavascript('document.getElementById("optIn").click()');
+    }
+
     void updateUrl() {
-      if(globals.refresh == true){
+      if (globals.refresh == true) {
         globals.refresh = false;
         controller.loadUrl(homeUrl);
       }
@@ -53,13 +55,13 @@ class HomeTabState extends State<HomeTab> {
     var timer = Timer.periodic(Duration(seconds: 1), (Timer t) => updateUrl());
 
     return Scaffold(
-        body: WebView(
+      body: WebView(
         //Creates WebView
         javascriptMode: JavascriptMode.unrestricted,
         initialUrl: homeUrl,
         onWebViewCreated: (controller) {
           this.controller = controller;
-          if(widget.isRedir == true){
+          if (widget.isRedir == true) {
             print("load qr");
             controller.loadUrl(widget.link);
           }
@@ -67,38 +69,36 @@ class HomeTabState extends State<HomeTab> {
           currentUrl = homeUrl;
         },
         onPageFinished: (url) async {
+          changeStorage();
+          var notifs = await controller.runJavascriptReturningResult(
+              'document.querySelector("#head_menu_rght > li.dropdown.messages-notification-container > span").firstChild.data');
+          var notif = await notifs.replaceAll(RegExp(r'^[a-zA-Z/"]+$'), '');
+          print('Without RegExp $notifs');
+          print('With RegExp $notif');
+          var intnotif = int.parse(notif);
+          if(intnotif != 0){
+            globals.msgNum = intnotif;
+          }
           print(url);
           controller.runJavascript(
               "document.getElementsByTagName('header')[0].style.display='none'");
           controller.runJavascript(
               "document.getElementsByTagName('footer')[0].style.display='none'");
+          print(notifs);
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          var data = prefs.getString('username');
+          var data = autoload.userName;
           print(prefs.getKeys());
           print("username is: $data");
           print("Login Data $data");
-          if(data == null){
-            print("data not detected, generating data file...");
-            var name = await controller.runJavascriptReturningResult("window.document.getElementsByTagName('p')[0].innerHTML;");
-            var username = name.replaceAll(RegExp('["@]'), '');
-            print("user is: $username");
-            prefs.setString('username', username);
-            print(prefs.getKeys());
-            print("username saved as: ${prefs.getString('username')}");
-          }
         },
         onPageStarted: (url) {
-          if(url == 'https://www.ur-cards.com/'){
-            autoload.isOnCards = Colors.blue;
-          }
           globals.currentLink = url;
           controller.runJavascript(
               "document.getElementsByTagName('header')[0].style.display='none'");
           controller.runJavascript(
               "document.getElementsByTagName('footer')[0].style.display='none'");
         },
-          onProgress: ,
       ),
     );
-}
+  }
 }
