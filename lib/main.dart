@@ -141,7 +141,11 @@ class LoadingPage extends StatelessWidget {
                 builder: (context) => new MainPage(isRedir: false,)
             ));
           }
+      },
+        onPageStarted: (url) {
+          print(url);
         }
+        ,
       ),
     );
   }

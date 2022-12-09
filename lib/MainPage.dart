@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -8,6 +7,8 @@ import 'HomeTab.dart' as home;
 import 'globals.dart' as globals;
 import 'autoloadglobals.dart' as autoload;
 import 'package:web_view/MessageTab.dart' as message;
+import 'package:app_bar_with_search_switch/app_bar_with_search_switch.dart';
+
 
 class MainPage extends StatefulWidget {
   final link;
@@ -27,11 +28,13 @@ class _MainPageState extends State<MainPage> {
 
   late WebViewController controller;
 
+
   bool idGot = false;
   bool loaded = false;
 
   var currentUrl;
 
+  TextEditingController textController = TextEditingController();
 
   get homeUrl => 'https://www.ur-point.com/index.php';
 
@@ -155,11 +158,25 @@ class _MainPageState extends State<MainPage> {
         onTap: _onNavTapped,
       ),
       drawer: NavDrawer(),
-      appBar: AppBar(
-        title: Image.asset('assets/urpointlogo.png', fit: BoxFit.cover),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-      ),
+      appBar: AppBarWithSearchSwitch(
+        customTextEditingController: textController,
+        onSubmitted: (value){
+          globals.currentLink = 'https://www.ur-point.com/search?query=$value';
+          print(globals.currentLink);
+          value = '';
+          textController.clear();
+        },
+        appBarBuilder: (BuildContext context) {
+          return AppBar(
+              title: Image.asset('assets/urpointlogo.png', fit: BoxFit.contain),
+              backgroundColor: Colors.deepPurple,
+              actions: [
+                AppBarSearchButton(
+                )
+              ]
+          );
+      },
+          ),
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
         children: [
@@ -189,4 +206,3 @@ class _MainPageState extends State<MainPage> {
   }
 
 }
-

@@ -70,26 +70,39 @@ class HomeTabState extends State<HomeTab> {
         },
         onPageFinished: (url) async {
           changeStorage();
-          var notifs = await controller.runJavascriptReturningResult(
-              'document.querySelector("#head_menu_rght > li.dropdown.messages-notification-container > span").firstChild.data');
-          var notif = await notifs.replaceAll(RegExp(r'^[a-zA-Z/"]+$'), '');
-          print('Without RegExp $notifs');
-          print('With RegExp $notif');
-          var intnotif = int.parse(notif);
-          if(intnotif != 0){
-            globals.msgNum = intnotif;
-          }
-          print(url);
+          // var notifs = await controller.runJavascriptReturningResult(
+           //   'document.querySelector("#head_menu_rght > li.dropdown.messages-notification-container > span").firstChild.data');
+          //var notifString = notifs.toString();
+         // var notif = await notifString.replaceAll(RegExp('[^0-9]'), '');
+         // print('Without RegExp $notifs');
+         // print('With RegExp $notif');
+         // var intnotif = int.parse(notif);
+         // if(intnotif != 0){
+        //    globals.msgNum = intnotif;
+        //  }
+         // var msgs = await controller.runJavascriptReturningResult('document.querySelector("#head_menu_rght > li.dropdown.messages-notification-container > span").firstChild.data');
+        //  var msg = await notifs.replaceAll(RegExp('[^0-9]'), '');
+       //   var msgString = msgs.toString();
+         // print('Without RegExp msg $msgs');
+        //  print('With RegExp msg $msg');
+        //  var intmsg = int.parse(msg);
+         // print('num of messages = $intmsg');
+         // if(intmsg != 0){
+         //   globals.msgNum = intmsg;
+        //    print(globals.msgNum);
+         // }
+         // print(url);
           controller.runJavascript(
               "document.getElementsByTagName('header')[0].style.display='none'");
           controller.runJavascript(
               "document.getElementsByTagName('footer')[0].style.display='none'");
-          print(notifs);
+         // print(notifs);
           SharedPreferences prefs = await SharedPreferences.getInstance();
           var data = autoload.userName;
           print(prefs.getKeys());
           print("username is: $data");
           print("Login Data $data");
+          print("page finished loading $url");
         },
         onPageStarted: (url) {
           globals.currentLink = url;
