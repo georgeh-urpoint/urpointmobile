@@ -10,6 +10,7 @@ import 'LoginPage.dart';
 String userName = '';
 String playerId = '';
 String userId = '';
+bool storageSetting = false;
 bool hasRan = false;
 
 Future<bool> loadData() async{
@@ -40,9 +41,10 @@ Future<bool> loadData() async{
 
 Future<void> loadUserData() async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  userName = prefs.getString('username')!;
-  playerId = prefs.getString('playerId')!;
-  userId = prefs.getString('userId')!;
+  userName = await prefs.getString('username')!;
+  playerId = await prefs.getString('playerId')!;
+  userId = await prefs.getString('userId')!;
+  storageSetting = await prefs.getBool('storageSetting')!;
   print("Username Loaded: $userName");
   print("account loaded successfully.");
   prefs.setBool('loggedIn', true);

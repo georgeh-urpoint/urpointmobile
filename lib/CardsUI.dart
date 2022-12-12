@@ -9,20 +9,20 @@ import 'package:web_view/MessageTab.dart' as message;
 import 'package:app_bar_with_search_switch/app_bar_with_search_switch.dart';
 
 
-class MainPage extends StatefulWidget {
+class CardPage extends StatefulWidget {
   final link;
   final isRedir;
 
-  MainPage({required this.isRedir, this.link});
+  CardPage({this.isRedir, this.link});
 
   @override
-  _MainPageState createState() {
-    return _MainPageState();
+  _CardPageState createState() {
+    return _CardPageState();
   }
 }
 
 
-class _MainPageState extends State<MainPage> {
+class _CardPageState extends State<CardPage> {
 
   late final dynamic isRedir;
 
@@ -86,6 +86,44 @@ class _MainPageState extends State<MainPage> {
                     new Positioned(
                       right: 0,
                       child: new Container(
+                          padding: EdgeInsets.all(1),
+                          decoration: new BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          constraints: BoxConstraints(
+                            minWidth: 12,
+                            minHeight: 12,
+                          ),
+                          child: globals.msgNum < 9?new Text(
+                            '${globals.msgNum}',
+                            style: new TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                            ),
+                            textAlign: TextAlign.center,
+                          ):
+                          new Text('9+',
+                              style: new TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                              textAlign: TextAlign.center)
+                      ),
+                    ):
+                    SizedBox.shrink()
+                  ]
+              ),
+              label: 'Messages'
+          ),
+          BottomNavigationBarItem(
+            icon: new Stack(
+                children: <Widget>[
+                  new Icon(Icons.notifications),
+                  globals.notifNum != 0?
+                  new Positioned(
+                    right: 0,
+                    child: new Container(
                         padding: EdgeInsets.all(1),
                         decoration: new BoxDecoration(
                           color: Colors.red,
@@ -95,65 +133,27 @@ class _MainPageState extends State<MainPage> {
                           minWidth: 12,
                           minHeight: 12,
                         ),
-                        child: globals.msgNum < 9?new Text(
-                          '${globals.msgNum}',
+                        child: globals.notifNum < 9?new Text(
+                          '${globals.notifNum}',
                           style: new TextStyle(
                             color: Colors.white,
                             fontSize: 10,
                           ),
                           textAlign: TextAlign.center,
                         ):
-                            new Text('9+',
+                        new Text('9+',
                             style: new TextStyle(
                               color: Colors.white,
                               fontSize: 10,
                             ),
                             textAlign: TextAlign.center)
-                      ),
-                    ):
-                    SizedBox.shrink()
-                  ]
-              ),
-              label: 'Messages'
-          ),
-    BottomNavigationBarItem(
-      icon: new Stack(
-        children: <Widget>[
-          new Icon(Icons.notifications),
-          globals.notifNum != 0?
-          new Positioned(
-            right: 0,
-            child: new Container(
-              padding: EdgeInsets.all(1),
-              decoration: new BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              constraints: BoxConstraints(
-                minWidth: 12,
-                minHeight: 12,
-              ),
-              child: globals.notifNum < 9?new Text(
-                '${globals.notifNum}',
-                style: new TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                ),
-                textAlign: TextAlign.center,
-              ):
-              new Text('9+',
-                  style: new TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                  ),
-                  textAlign: TextAlign.center)
+                    ),
+                  ):
+                  SizedBox.shrink()
+                ]
             ),
-          ):
-          SizedBox.shrink()
-  ]
-      ),
-      label: 'Notifications',
-    ),
+            label: 'Notifications',
+          ),
           BottomNavigationBarItem(
               icon: Icon(Icons.account_circle),
               label: 'Profile')
@@ -173,21 +173,18 @@ class _MainPageState extends State<MainPage> {
         },
         appBarBuilder: (BuildContext context) {
           return AppBar(
-            toolbarHeight: 50,
-              title: SizedBox(
-                height: kToolbarHeight,
-                child: Image.asset('assets/urpointlogo.png', fit: BoxFit.fill),
-              ),
+              toolbarHeight: 50,
+              title: Image.asset(globals.currentUrLogo, fit: BoxFit.fill),
               centerTitle: true,
-              backgroundColor: Colors.deepPurple,
+              backgroundColor: Colors.blueAccent,
               actions: [
                 AppBarSearchButton(
                   searchActiveButtonColor: Colors.purple,
                 )
               ]
           );
-      },
-          ),
+        },
+      ),
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
         children: [

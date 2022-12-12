@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -20,6 +21,7 @@ import 'package:web_view/MainPage.dart';
 import 'package:web_view/globals.dart' as globals;
 import 'autoloadglobals.dart' as autoload;
 import 'package:web_view/HomeTab.dart' as home;
+import 'package:web_view/CardsUI.dart' as card;
 
 Future<void> main() async {
 
@@ -43,7 +45,8 @@ Future<void> main() async {
 
   var platform = getPlatform();
   print("platform is $platform");
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  autoload.loadUserData();
 }
 
 // Function to get the users platform
@@ -350,12 +353,17 @@ class NavDrawer extends StatefulWidget {
 }
 
 class NavDrawerState extends State<NavDrawer> {
-  bool forAndroid = true;
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+
+
+  bool forAndroid = autoload.storageSetting;
 
   late String labelText;
 
   @override
   Widget build(BuildContext context) {
+
     if(forAndroid == true){
       labelText = "All Posts will be Kept";
     }
@@ -386,7 +394,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Photobooth-P.png', fit: BoxFit.cover),
             title: Text('Photo Booth'),
             onTap: () => {
-              globals.currentLink = 'https://www.ur-point.com/ur-photo-booth',
+            home.webcontroller.loadUrl('https://www.ur-point.com/ur-photo-booth'),
               print(globals.currentLink),
               Navigator.pop(context),
             },
@@ -396,7 +404,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Photos-P.png', fit: BoxFit.cover),
             title: Text('Photos'),
             onTap: () => {
-              globals.currentLink = 'https://www.ur-point.com/ur-photos',
+            home.webcontroller.loadUrl('https://www.ur-point.com/ur-photos'),
               Navigator.pop(context),
             },
           ),
@@ -405,7 +413,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Videos-P.png', fit: BoxFit.cover),
             title: Text('Videos'),
             onTap: () => {
-              globals.currentLink = 'https://www.ur-point.com/ur-videos',
+            home.webcontroller.loadUrl('https://www.ur-point.com/ur-videos'),
               Navigator.pop(context)
             },
           ),
@@ -414,7 +422,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Business-P.png', fit: BoxFit.cover),
             title: Text('Business'),
             onTap: () => {
-              globals.currentLink = 'https://www.ur-point.com/ur-business',
+            home.webcontroller.loadUrl('https://www.ur-point.com/ur-business'),
               Navigator.pop(context)
             },
           ),
@@ -423,7 +431,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Groups-P.png', fit: BoxFit.cover),
             title: Text('Groups'),
             onTap: () => {
-              globals.currentLink = 'https://www.ur-point.com/groups',
+            home.webcontroller.loadUrl('https://www.ur-point.com/groups'),
               Navigator.pop(context)
             },
           ),
@@ -432,7 +440,8 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Events-P.png', fit: BoxFit.cover),
             title: Text('Events'),
             onTap: () => {
-              globals.currentLink = 'https://www.ur-point.com/events',
+            home.webcontroller.loadUrl('https://www.ur-point.com/events'),
+              globals.currentUrLogo = 'UrIcons/Ur-Events-P.png',
               Navigator.pop(context)
             },
           ),
@@ -441,8 +450,10 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Cards-P.png', fit: BoxFit.cover),
             title: Text('Cards'),
             onTap: () => {
-              globals.currentLink = 'https://www.ur-cards.com/',
-              Navigator.pop(context)
+              home.webcontroller.loadUrl('https://www.ur-cards.com/'),
+              globals.currentUrLogo = 'UrIcons/Ur-Cards-P.png',
+              Navigator.pop(context),
+              card.CardPage(),
             },
           ),
           ListTile(
@@ -468,6 +479,7 @@ class NavDrawerState extends State<NavDrawer> {
                     ),
                     TextButton(
                       onPressed: () {
+                        home.webcontroller.loadUrl('https://www.ur-point.com/logout');
                         autoload.logOut(context);
                       },
                       child: Container(
@@ -483,7 +495,7 @@ class NavDrawerState extends State<NavDrawer> {
           ),
           Container(
             width: 42.0,
-            height: 120.0,
+            height: 136.0,
             child: DecoratedBox(
               decoration: BoxDecoration(border:
               Border.all(color: Colors.black),
@@ -494,31 +506,45 @@ class NavDrawerState extends State<NavDrawer> {
                 children: [
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text('data')
+                        Text('Storage', style: new TextStyle(
+                          fontSize: 20.0,
+                          color: Colors.purple
+                        ),),
+                        Switch(
+                            activeColor: Colors.purple,
+                            activeTrackColor: Colors.black,
+                            inactiveThumbColor: Colors.purple,
+                            inactiveTrackColor: Colors.black26,
+                            splashRadius: 50.0,
+                            // boolean variable value
+                            value: forAndroid,
+                            // changes the state of the switch
+                            onChanged: (value) async {
+                              final SharedPreferences prefs = await _prefs;
+                              setState(() {
+                                prefs.setBool('storageSetting', value);
+                                print(prefs.getBool('storageSetting'));
+                                home.webcontroller.runJavascript('\$( "#toggleSwitch" ).click()');
+                                forAndroid = value;
+                                print('changed storage to $value');
+                              });
+                            }
+                        ),
+                        Text(labelText,
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            home.webcontroller.loadUrl('https://www.ur-point.com/upgrade');
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Upgrade'),
+                        ),
                       ],
-                    ),
-                  ),
-                  Switch(
-                      activeColor: Colors.purple,
-                      activeTrackColor: Colors.black,
-                      inactiveThumbColor: Colors.purple,
-                      inactiveTrackColor: Colors.black26,
-                      splashRadius: 50.0,
-                      // boolean variable value
-                      value: forAndroid,
-                      // changes the state of the switch
-                      onChanged: (value) {
-                        setState(() {
-                          forAndroid = value;
-                          print('changed storage to $value');
-                        });
-                      }
-                  ),
-                  Text(labelText,
-                    style: TextStyle(
-                      fontSize: 18,
                     ),
                   ),
                 ],

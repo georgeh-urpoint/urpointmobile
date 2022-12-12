@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web_view/autoloadglobals.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'MainPage.dart';
 import 'main.dart';

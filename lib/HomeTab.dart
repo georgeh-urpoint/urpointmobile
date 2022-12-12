@@ -1,10 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'globals.dart' as globals;
 import 'autoloadglobals.dart' as autoload;
+
+late WebViewController webcontroller;
 
 
 void changeUrl(bool, link) {
@@ -28,8 +28,6 @@ class HomeTabState extends State<HomeTab> {
   final homeUrl = 'https://www.ur-point.com/';
   var currentUrl;
 
-  late WebViewController controller;
-
   bool isLoading = false;
 
 
@@ -37,22 +35,8 @@ class HomeTabState extends State<HomeTab> {
   Widget build(BuildContext context) {
 
     void changeStorage(){
-      controller.runJavascript('document.getElementById("optIn").click()');
+      webcontroller.runJavascript('document.getElementById("optIn").click()');
     }
-
-    void updateUrl() {
-      if (globals.refresh == true) {
-        globals.refresh = false;
-        controller.loadUrl(homeUrl);
-      }
-      if (currentUrl != globals.currentLink) {
-        print("LOADING");
-        controller.loadUrl(globals.currentLink);
-        currentUrl = globals.currentLink;
-      }
-    }
-
-    var timer = Timer.periodic(Duration(seconds: 1), (Timer t) => updateUrl());
 
     return Scaffold(
       body: WebView(
@@ -60,7 +44,7 @@ class HomeTabState extends State<HomeTab> {
         javascriptMode: JavascriptMode.unrestricted,
         initialUrl: homeUrl,
         onWebViewCreated: (controller) {
-          this.controller = controller;
+          webcontroller = controller;
           if (widget.isRedir == true) {
             print("load qr");
             controller.loadUrl(widget.link);
@@ -92,9 +76,9 @@ class HomeTabState extends State<HomeTab> {
         //    print(globals.msgNum);
          // }
          // print(url);
-          controller.runJavascript(
+          webcontroller.runJavascript(
               "document.getElementsByTagName('header')[0].style.display='none'");
-          controller.runJavascript(
+          webcontroller.runJavascript(
               "document.getElementsByTagName('footer')[0].style.display='none'");
          // print(notifs);
           SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -106,9 +90,9 @@ class HomeTabState extends State<HomeTab> {
         },
         onPageStarted: (url) {
           globals.currentLink = url;
-          controller.runJavascript(
+          webcontroller.runJavascript(
               "document.getElementsByTagName('header')[0].style.display='none'");
-          controller.runJavascript(
+          webcontroller.runJavascript(
               "document.getElementsByTagName('footer')[0].style.display='none'");
         },
       ),
