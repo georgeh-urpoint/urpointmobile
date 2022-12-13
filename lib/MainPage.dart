@@ -8,6 +8,8 @@ import 'globals.dart' as globals;
 import 'package:web_view/MessageTab.dart' as message;
 import 'package:app_bar_with_search_switch/app_bar_with_search_switch.dart';
 
+var selectedIndex = 0;
+
 
 class MainPage extends StatefulWidget {
   final link;
@@ -28,9 +30,6 @@ class _MainPageState extends State<MainPage> {
 
   late WebViewController controller;
 
-  var currentLogo = globals.currentUrLogo;
-
-
   bool idGot = false;
   bool loaded = false;
 
@@ -44,21 +43,16 @@ class _MainPageState extends State<MainPage> {
 
   get link => widget.link;
 
-  int _selectedIndex = 0;
-
   void _onNavTapped(int index){
-    if(_selectedIndex == 0 && index == 0){
-      globals.refresh = true;
+    if(selectedIndex == 0 && index == 0){
+      home.webcontroller.loadUrl('https://www.ur-point.com/index.php');
     }
     setState((){
-      _selectedIndex = index;
+      selectedIndex = index;
     });
   }
 
   @override
-
-
-
   Widget build(BuildContext context) {
 
     List<Widget> _pages = <Widget>[
@@ -114,7 +108,7 @@ class _MainPageState extends State<MainPage> {
                     SizedBox.shrink()
                   ]
               ),
-              label: 'Messages'
+              label: 'Chat'
           ),
     BottomNavigationBarItem(
       icon: new Stack(
@@ -158,7 +152,7 @@ class _MainPageState extends State<MainPage> {
               icon: Icon(Icons.account_circle),
               label: 'Profile')
         ],
-        currentIndex: _selectedIndex,
+        currentIndex: selectedIndex,
         onTap: _onNavTapped,
       ),
       drawer: NavDrawer(),
@@ -168,7 +162,7 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Colors.deepPurple,
         customTextEditingController: textController,
         onSubmitted: (value){
-          _selectedIndex = 0;
+          selectedIndex = 0;
           home.webcontroller.loadUrl('https://www.ur-point.com/search?query=$value');
         },
         appBarBuilder: (BuildContext context) {
@@ -210,7 +204,7 @@ class _MainPageState extends State<MainPage> {
         ],
       ),
       body: IndexedStack(
-        index: _selectedIndex,
+        index: selectedIndex,
         children: _pages,
       ),
     );

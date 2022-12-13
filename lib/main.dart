@@ -168,7 +168,8 @@ class _CameraPageState extends State<CameraPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Mobile Scanner'),
+          title: const Text('QR Code Scanner'),
+          backgroundColor: Colors.deepPurpleAccent,
           actions: [
             IconButton(
               color: Colors.white,
@@ -281,11 +282,11 @@ class _GenerateQRPageState extends State<GenerateQRPage> {
                     var image = await boundary.toImage();
                     ByteData byteData = await image.toByteData(format: ImageByteFormat.png) as ByteData;
                     Uint8List pngBytes = byteData.buffer.asUint8List();
-
                     final tempDir = await getTemporaryDirectory();
                     final file = await new File('${tempDir.path}/image.png').create();
                     await file.writeAsBytes(pngBytes);
                     showToast("QR Saved Successfully");
+                    print("qr saved");
                   },
                   child: Text('Save QR Invite')),
               ElevatedButton(
@@ -364,6 +365,8 @@ class NavDrawerState extends State<NavDrawer> {
   @override
   Widget build(BuildContext context) {
 
+    final ButtonStyle style = ElevatedButton.styleFrom(backgroundColor: Colors.purpleAccent, textStyle: TextStyle(fontSize: 12));
+
     if(forAndroid == true){
       labelText = "All Posts will be Kept";
     }
@@ -428,6 +431,15 @@ class NavDrawerState extends State<NavDrawer> {
           ),
           ListTile(
             minVerticalPadding: 25,
+            leading: Image.asset('UrIcons/Ur-Business-P.png', fit: BoxFit.cover),
+            title: Text('Message'),
+            onTap: () => {
+              home.webcontroller.loadUrl('https://www.ur-point.com/ur-message'),
+              Navigator.pop(context)
+            },
+          ),
+          ListTile(
+            minVerticalPadding: 25,
             leading: Image.asset('UrIcons/Ur-Groups-P.png', fit: BoxFit.cover),
             title: Text('Groups'),
             onTap: () => {
@@ -441,7 +453,6 @@ class NavDrawerState extends State<NavDrawer> {
             title: Text('Events'),
             onTap: () => {
             home.webcontroller.loadUrl('https://www.ur-point.com/events'),
-              globals.currentUrLogo = 'UrIcons/Ur-Events-P.png',
               Navigator.pop(context)
             },
           ),
@@ -451,7 +462,6 @@ class NavDrawerState extends State<NavDrawer> {
             title: Text('Cards'),
             onTap: () => {
               home.webcontroller.loadUrl('https://www.ur-cards.com/'),
-              globals.currentUrLogo = 'UrIcons/Ur-Cards-P.png',
               Navigator.pop(context),
               card.CardPage(),
             },
@@ -542,6 +552,7 @@ class NavDrawerState extends State<NavDrawer> {
                             home.webcontroller.loadUrl('https://www.ur-point.com/upgrade');
                             Navigator.pop(context);
                           },
+                          style: style,
                           child: const Text('Upgrade'),
                         ),
                       ],

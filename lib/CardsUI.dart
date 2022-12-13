@@ -28,9 +28,6 @@ class _CardPageState extends State<CardPage> {
 
   late WebViewController controller;
 
-  var currentLogo = globals.currentUrLogo;
-
-
   bool idGot = false;
   bool loaded = false;
 
@@ -56,9 +53,6 @@ class _CardPageState extends State<CardPage> {
   }
 
   @override
-
-
-
   Widget build(BuildContext context) {
 
     List<Widget> _pages = <Widget>[
@@ -174,7 +168,7 @@ class _CardPageState extends State<CardPage> {
         appBarBuilder: (BuildContext context) {
           return AppBar(
               toolbarHeight: 50,
-              title: Image.asset(globals.currentUrLogo, fit: BoxFit.fill),
+              title: Image.asset('', fit: BoxFit.fill),
               centerTitle: true,
               backgroundColor: Colors.blueAccent,
               actions: [

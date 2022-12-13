@@ -10,7 +10,7 @@ import 'LoginPage.dart';
 String userName = '';
 String playerId = '';
 String userId = '';
-bool storageSetting = false;
+late bool storageSetting;
 bool hasRan = false;
 
 Future<bool> loadData() async{
