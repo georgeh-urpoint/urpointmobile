@@ -45,7 +45,11 @@ Future<void> main() async {
 
   var platform = getPlatform();
   print("platform is $platform");
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.deepPurple, // navigation bar color
+    statusBarColor: Colors.deepPurple, // status bar color
+  ));
   autoload.loadUserData();
 }
 
@@ -387,7 +391,7 @@ class NavDrawerState extends State<NavDrawer> {
               ),
             ),
             decoration: BoxDecoration(
-                color: Colors.purple,
+                color: Colors.deepPurple,
                 image: DecorationImage(
                     fit: BoxFit.fill,
                     image: AssetImage(''))),

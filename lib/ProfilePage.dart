@@ -2,6 +2,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'autoloadglobals.dart' as globals;
@@ -13,7 +14,7 @@ class ProfilePage extends StatefulWidget {
   }
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClientMixin<ProfilePage>{
 
   bool idGot = false;
 
@@ -21,22 +22,29 @@ class _ProfilePageState extends State<ProfilePage> {
 
   late WebViewController controller;
   @override
+  bool get wantKeepAlive => true;
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: WebView(
-          javascriptMode: JavascriptMode.unrestricted,
-          initialUrl: 'https://www.ur-point.com/${globals.userName}',
-          onWebViewCreated: (controller) async {
-            this.controller = controller;
-            controller.loadUrl('https://www.ur-point.com/${globals.userName}');
-          },
-          onPageFinished: (String url) {
-            print('Page finished loading: $url');
-            controller.runJavascript(
-                "document.getElementsByTagName('header')[0].style.display='none'");
-            controller.runJavascript(
-                "document.getElementsByTagName('footer')[0].style.display='none'");
-          },
+    return MaterialApp(
+        home: Scaffold(
+          body: WebView(
+            javascriptMode: JavascriptMode.unrestricted,
+            initialUrl: 'https://www.ur-point.com/${globals.userName}',
+            onWebViewCreated: (controller) async {
+              this.controller = controller;
+              controller.loadUrl('https://www.ur-point.com/${globals.userName}');
+            },
+            onPageFinished: (String url) {
+              print('Page finished loading: $url');
+              controller.runJavascript(
+                  "document.getElementsByTagName('header')[0].style.display='none'");
+              controller.runJavascript(
+                  "document.getElementsByTagName('footer')[0].style.display='none'");
+              controller.runJavascript(
+                  'document.querySelector("#contnet > div.page-margin > div > div.sidebar-conatnier.col-md-3.leftcol.sidebar_fixed.no-padding-right > div").style.display="none"');
+              controller.runJavascript(
+                  'document.querySelector("#contnet > div.page-margin > div > div.restrictMiddle > div > div.sun_profile_header_area").style.display="none"');
+            },
+          ),
         )
     );
   }

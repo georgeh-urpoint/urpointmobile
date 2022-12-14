@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 
 late WebViewController webcontroller;
 
@@ -36,7 +38,8 @@ class MessageTabState extends State<MessageTab> {
           appBar: TabBar(
             unselectedLabelColor: Colors.grey,
             labelColor: Colors.black,
-            onTap: (index) {
+            onTap: (index) async {
+              SystemChannels.platform.invokeMethod<void>('HapticFeedback.vibrate');
               print(index);
               if(index == 0){
                 webcontroller.runJavascript('document.querySelector("#wo_msg_left_prt > form > ul > li:nth-child(1) > a").click()');

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'PostPage.dart';
 import 'ProfilePage.dart';
+import 'ProfileTab.dart';
 import 'main.dart';
 import 'HomeTab.dart' as home;
 import 'globals.dart' as globals;
@@ -45,7 +48,7 @@ class _MainPageState extends State<MainPage> {
 
   void _onNavTapped(int index){
     if(selectedIndex == 0 && index == 0){
-      home.webcontroller.loadUrl('https://www.ur-point.com/index.php');
+      home.webcontroller.runJavascript("window.scrollTo({top: 0, behavior: 'smooth'});");
     }
     setState((){
       selectedIndex = index;
@@ -59,7 +62,7 @@ class _MainPageState extends State<MainPage> {
       home.HomeTab(isRedir: widget.isRedir, link: 'https://www.ur-point.com/index.php',),
       message.MessageTab(),
       Text('Notifications Page Currently Unavailable. Check back soon!'),
-      ProfilePage(),
+      ProfileTab(),
     ];
 
     return Scaffold(
@@ -157,6 +160,9 @@ class _MainPageState extends State<MainPage> {
       ),
       drawer: NavDrawer(),
       appBar: AppBarWithSearchSwitch(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.deepPurple
+        ),
         fieldHintText: 'Search Groups',
         keepAppBarColors: true,
         backgroundColor: Colors.deepPurple,
@@ -200,7 +206,14 @@ class _MainPageState extends State<MainPage> {
                 return GenerateQRPage(url: globals.currentLink);
               }));
             },
-          )
+          ),
+          FloatingActionButton(
+            child: const Text('Share Ur-Point'),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return PostPage();
+                }));
+              })
         ],
       ),
       body: IndexedStack(
