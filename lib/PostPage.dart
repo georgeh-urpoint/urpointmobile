@@ -39,8 +39,9 @@ class _PostPageState extends State<PostPage>{
         title: ElevatedButton.icon(
           style: style,
           onPressed: () {
-            home.webcontroller.runJavascript('document.querySelector("#publisher-button").click()');
+            home.webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-button").click()');
             Navigator.pop(context);
+            home.webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-box-focus > div").style.display="none"');
           },
           label: Text('Send'),
           icon: Icon(Icons.send),
@@ -51,7 +52,7 @@ class _PostPageState extends State<PostPage>{
         children: [
           TextField(
             onChanged: (value) {
-              home.webcontroller.runJavascript('document.querySelector("#post-textarea > div > textarea").value="$value"');
+              home.webcontroller.evaluateJavascript(source: 'document.querySelector("#post-textarea > div > textarea").value="$value"');
             },
             autofocus: true,
             decoration: InputDecoration(
@@ -64,7 +65,7 @@ class _PostPageState extends State<PostPage>{
               ElevatedButton.icon(
                 style: small,
                 onPressed: () async {
-                  home.webcontroller.runJavascript('document.querySelector("#publisher-photos").click()');
+                  home.webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-photos").click()');
                 },
                 label: Text('Upload Photo'),
                 icon: Icon(Icons.image),

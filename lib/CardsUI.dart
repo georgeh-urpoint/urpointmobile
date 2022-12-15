@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'ProfilePage.dart';
 import 'main.dart';
 import 'HomeTab.dart' as home;
@@ -26,7 +26,7 @@ class _CardPageState extends State<CardPage> {
 
   late final dynamic isRedir;
 
-  late WebViewController controller;
+  late InAppWebViewController controller;
 
   bool idGot = false;
   bool loaded = false;
@@ -163,7 +163,7 @@ class _CardPageState extends State<CardPage> {
         customTextEditingController: textController,
         onSubmitted: (value){
           _selectedIndex = 0;
-          home.webcontroller.loadUrl('https://www.ur-point.com/search?query=$value');
+          home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/search?query=$value')));
         },
         appBarBuilder: (BuildContext context) {
           return AppBar(

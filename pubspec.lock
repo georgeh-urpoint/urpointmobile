@@ -8,13 +8,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.10"
-  anim_search_bar:
-    dependency: "direct main"
-    description:
-      name: anim_search_bar
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.2"
   app_bar_with_search_switch:
     dependency: "direct main"
     description:
@@ -113,13 +106,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "7.0.0"
-  easy_search_bar:
-    dependency: "direct main"
-    description:
-      name: easy_search_bar
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.4.2"
   fake_async:
     dependency: transitive
     description:
@@ -195,6 +181,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.1"
+  flutter_inappwebview:
+    dependency: "direct main"
+    description:
+      name: flutter_inappwebview
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.7.2+2"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -209,13 +202,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.7"
-  flutter_search_bar:
-    dependency: "direct main"
-    description:
-      name: flutter_search_bar
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.1.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -226,13 +212,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_webview_pro:
-    dependency: "direct main"
-    description:
-      name: flutter_webview_pro
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.0.1+4"
   fluttertoast:
     dependency: "direct main"
     description:
@@ -366,13 +345,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.5.0"
-  outline_search_bar:
-    dependency: "direct main"
-    description:
-      name: outline_search_bar
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.3.0"
   path:
     dependency: transitive
     description:
@@ -463,7 +435,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.4"
+    version: "6.0.5"
   pull_to_refresh:
     dependency: "direct main"
     description:
@@ -526,7 +498,7 @@ packages:
       name: shared_preferences_linux
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.2"
   shared_preferences_macos:
     dependency: transitive
     description:
@@ -554,14 +526,7 @@ packages:
       name: shared_preferences_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.1"
-  simple_text_field:
-    dependency: transitive
-    description:
-      name: simple_text_field
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.1.0"
+    version: "2.1.2"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -616,10 +581,38 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.1"
+  url_launcher:
+    dependency: "direct main"
+    description:
+      name: url_launcher
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "6.1.7"
+  url_launcher_android:
+    dependency: transitive
+    description:
+      name: url_launcher_android
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "6.0.22"
+  url_launcher_ios:
+    dependency: transitive
+    description:
+      name: url_launcher_ios
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "6.0.17"
   url_launcher_linux:
     dependency: transitive
     description:
       name: url_launcher_linux
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1"
+  url_launcher_macos:
+    dependency: transitive
+    description:
+      name: url_launcher_macos
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1"
@@ -686,27 +679,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.9.5"
-  webview_pro_android:
-    dependency: transitive
-    description:
-      name: webview_pro_android
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.8.3+3"
-  webview_pro_platform_interface:
-    dependency: transitive
-    description:
-      name: webview_pro_platform_interface
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.8.1+2"
-  webview_pro_wkwebview:
-    dependency: transitive
-    description:
-      name: webview_pro_wkwebview
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.7.1+3"
   win32:
     dependency: transitive
     description:
@@ -714,13 +686,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.2"
-  wp_search_bar:
-    dependency: "direct main"
-    description:
-      name: wp_search_bar
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.6"
   xdg_directories:
     dependency: transitive
     description:

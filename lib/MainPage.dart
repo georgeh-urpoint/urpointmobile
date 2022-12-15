@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'PostPage.dart';
 import 'ProfilePage.dart';
@@ -48,7 +49,7 @@ class _MainPageState extends State<MainPage> {
 
   void _onNavTapped(int index){
     if(selectedIndex == 0 && index == 0){
-      home.webcontroller.runJavascript("window.scrollTo({top: 0, behavior: 'smooth'});");
+      home.webcontroller.evaluateJavascript(source: "window.scrollTo({top: 0, behavior: 'smooth'});");
     }
     setState((){
       selectedIndex = index;
@@ -169,7 +170,7 @@ class _MainPageState extends State<MainPage> {
         customTextEditingController: textController,
         onSubmitted: (value){
           selectedIndex = 0;
-          home.webcontroller.loadUrl('https://www.ur-point.com/search?query=$value');
+          home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/search?query=$value')));
         },
         appBarBuilder: (BuildContext context) {
           return AppBar(
@@ -210,6 +211,7 @@ class _MainPageState extends State<MainPage> {
           FloatingActionButton(
             child: const Text('Share Ur-Point'),
               onPressed: () {
+                home.webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-box-focus > div").style.display="block"');
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
                   return PostPage();
                 }));

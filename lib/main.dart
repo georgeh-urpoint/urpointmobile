@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter/platform_interface.dart';
+import 'package:webview_flutter/webview_flutter.dart' as webview;
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -129,11 +131,11 @@ class MyApp extends StatelessWidget {
 }
 
 class LoadingPage extends StatelessWidget {
-  late WebViewController controller;
+  late webview.WebViewController controller;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: WebView(
+      body: webview.WebView(
         javascriptMode: JavascriptMode.unrestricted,
         initialUrl: 'https://www.ur-point.com/index.php',
         onWebViewCreated: (controller) async {
@@ -401,7 +403,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Photobooth-P.png', fit: BoxFit.cover),
             title: Text('Photo Booth'),
             onTap: () => {
-            home.webcontroller.loadUrl('https://www.ur-point.com/ur-photo-booth'),
+            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/ur-photo-booth'))),
               print(globals.currentLink),
               Navigator.pop(context),
             },
@@ -411,7 +413,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Photos-P.png', fit: BoxFit.cover),
             title: Text('Photos'),
             onTap: () => {
-            home.webcontroller.loadUrl('https://www.ur-point.com/ur-photos'),
+            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/ur-photos'))),
               Navigator.pop(context),
             },
           ),
@@ -420,7 +422,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Videos-P.png', fit: BoxFit.cover),
             title: Text('Videos'),
             onTap: () => {
-            home.webcontroller.loadUrl('https://www.ur-point.com/ur-videos'),
+            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/ur-videos'))),
               Navigator.pop(context)
             },
           ),
@@ -429,7 +431,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Business-P.png', fit: BoxFit.cover),
             title: Text('Business'),
             onTap: () => {
-            home.webcontroller.loadUrl('https://www.ur-point.com/ur-business'),
+            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/ur-business'))),
               Navigator.pop(context)
             },
           ),
@@ -438,7 +440,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Business-P.png', fit: BoxFit.cover),
             title: Text('Message'),
             onTap: () => {
-              home.webcontroller.loadUrl('https://www.ur-point.com/ur-message'),
+            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/ur-message'))),
               Navigator.pop(context)
             },
           ),
@@ -447,7 +449,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Groups-P.png', fit: BoxFit.cover),
             title: Text('Groups'),
             onTap: () => {
-            home.webcontroller.loadUrl('https://www.ur-point.com/groups'),
+            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/groups'))),
               Navigator.pop(context)
             },
           ),
@@ -456,7 +458,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Events-P.png', fit: BoxFit.cover),
             title: Text('Events'),
             onTap: () => {
-            home.webcontroller.loadUrl('https://www.ur-point.com/events'),
+            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/events'))),
               Navigator.pop(context)
             },
           ),
@@ -465,7 +467,7 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Cards-P.png', fit: BoxFit.cover),
             title: Text('Cards'),
             onTap: () => {
-              home.webcontroller.loadUrl('https://www.ur-cards.com/'),
+            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-cards.com/'))),
               Navigator.pop(context),
               card.CardPage(),
             },
@@ -493,7 +495,7 @@ class NavDrawerState extends State<NavDrawer> {
                     ),
                     TextButton(
                       onPressed: () {
-                        home.webcontroller.loadUrl('https://www.ur-point.com/logout');
+                        home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/logout')));
                         autoload.logOut(context);
                       },
                       child: Container(
@@ -540,7 +542,7 @@ class NavDrawerState extends State<NavDrawer> {
                               setState(() {
                                 prefs.setBool('storageSetting', value);
                                 print(prefs.getBool('storageSetting'));
-                                home.webcontroller.runJavascript('\$( "#toggleSwitch" ).click()');
+                                home.webcontroller.evaluateJavascript(source: '\$( "#toggleSwitch" ).click()');
                                 forAndroid = value;
                                 print('changed storage to $value');
                               });
@@ -553,7 +555,7 @@ class NavDrawerState extends State<NavDrawer> {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            home.webcontroller.loadUrl('https://www.ur-point.com/upgrade');
+                            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/upgrade')));
                             Navigator.pop(context);
                           },
                           style: style,

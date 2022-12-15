@@ -2,14 +2,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_webview_pro/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'globals.dart' as globals;
 import 'autoloadglobals.dart' as autoload;
 import 'main.dart' as main;
 
 
 
-late WebViewController webcontroller;
+late InAppWebViewController webcontroller;
 
 
 void changeUrl(bool, link) {
@@ -38,7 +39,7 @@ class HomeTabState extends State<HomeTab> {
   bool isLoading = false;
 
   void scrollToTop() {
-    webcontroller.runJavascript("window.scrollTo({top: 0, behavior: 'smooth'});");
+    webcontroller.evaluateJavascript(source: "window.scrollTo({top: 0, behavior: 'smooth'});");
     setState(() {
       scrollButtonShow = false;
     });
@@ -55,25 +56,23 @@ class HomeTabState extends State<HomeTab> {
     });
 
     void changeStorage(){
-      webcontroller.runJavascript('document.getElementById("optIn").click()');
+      webcontroller.evaluateJavascript(source: 'document.getElementById("optIn").click()');
     }
 
     return MaterialApp(
       home: Scaffold(
-          body: WebView(
+          body: InAppWebView(
               //Creates WebView
-              javascriptMode: JavascriptMode.unrestricted,
-              initialUrl: homeUrl,
+              initialUrlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com')),
               onWebViewCreated: (controller) {
                 webcontroller = controller;
                 if (widget.isRedir == true) {
                   print("load qr");
-                  controller.loadUrl(widget.link);
                 }
                 globals.currentLink = homeUrl;
                 currentUrl = homeUrl;
               },
-              onPageFinished: (url) async {
+              onLoadStop: (webcontroller, url) async {
                 // var notifs = await controller.runJavascriptReturningResult(
                 //   'document.querySelector("#head_menu_rght > li.dropdown.messages-notification-container > span").firstChild.data');
                 //var notifString = notifs.toString();
@@ -96,11 +95,11 @@ class HomeTabState extends State<HomeTab> {
                 //    print(globals.msgNum);
                 // }
                 // print(url);
-                webcontroller.runJavascript('document.querySelector("#publisher-box-focus").style.display="none"');
-                webcontroller.runJavascript(
-                    "document.getElementsByTagName('header')[0].style.display='none'");
-                webcontroller.runJavascript(
-                    "document.getElementsByTagName('footer')[0].style.display='none'");
+                webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-box-focus > div").style.display="none"');
+                webcontroller.evaluateJavascript(
+                    source: "document.getElementsByTagName('header')[0].style.display='none'");
+                webcontroller.evaluateJavascript(
+                    source:  "document.getElementsByTagName('footer')[0].style.display='none'");
                 // print(notifs);
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 var data = autoload.userName;
@@ -109,12 +108,11 @@ class HomeTabState extends State<HomeTab> {
                 print("Login Data $data");
                 print("page finished loading $url");
               },
-              onPageStarted: (url) {
-                globals.currentLink = url;
-                webcontroller.runJavascript(
-                    "document.getElementsByTagName('header')[0].style.display='none'");
-                webcontroller.runJavascript(
-                    "document.getElementsByTagName('footer')[0].style.display='none'");
+              onLoadStart: (webcontroller, url) {
+                webcontroller.evaluateJavascript(
+                    source: "document.getElementsByTagName('header')[0].style.display='none'");
+                webcontroller.evaluateJavascript(
+                    source: "document.getElementsByTagName('footer')[0].style.display='none'");
               },
             ),
       )
