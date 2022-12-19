@@ -3,12 +3,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'autoloadglobals.dart' as globals;
 import 'package:web_view/HomeTab.dart' as home;
 import 'package:web_view/ProfilePage.dart' as profile;
+
+late InAppWebViewController webcontroller;
 
 class PostPage extends StatefulWidget {
   @override
@@ -19,14 +22,26 @@ class PostPage extends StatefulWidget {
 
 class _PostPageState extends State<PostPage>{
 
+  var getImage = home.webcontroller.evaluateJavascript(source: 'document.querySelector("#image_to_0 > img")');
+
   final ButtonStyle style = ElevatedButton.styleFrom(backgroundColor: Colors.purpleAccent, textStyle: TextStyle(fontSize: 16));
   final ButtonStyle small = ElevatedButton.styleFrom(backgroundColor: Colors.purple, textStyle: TextStyle(fontSize: 12));
 
   final ImagePicker _picker = ImagePicker();
 
+  bool isLoaded = false;
+  bool isLoading = true;
+
   bool idGot = false;
 
   bool loaded = false;
+
+  void makeVisible(){
+    setState(() {
+      isLoaded = true;
+      isLoading = false;
+    });
+  }
 
   late WebViewController controller;
   @override
@@ -39,55 +54,53 @@ class _PostPageState extends State<PostPage>{
         title: ElevatedButton.icon(
           style: style,
           onPressed: () {
-            home.webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-button").click()');
+            webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-button").click()');
+            home.webcontroller.reload();
             Navigator.pop(context);
-            home.webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-box-focus > div").style.display="none"');
+
           },
           label: Text('Send'),
           icon: Icon(Icons.send),
 
         ),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          TextField(
-            onChanged: (value) {
-              home.webcontroller.evaluateJavascript(source: 'document.querySelector("#post-textarea > div > textarea").value="$value"');
-            },
-            autofocus: true,
-            decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Share Ur-Point'
+          Visibility(
+            visible: this.isLoaded,
+            maintainState: true,
+            child: InAppWebView(
+              //Creates WebView
+                initialUrlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com')),
+                onWebViewCreated: (controller) {
+                  webcontroller = controller;
+                },
+                onLoadStart: (webcontroller, url) async {
+                  isLoaded = false;
+                  isLoading = true;
+                },
+                onLoadStop: (webcontroller, url) async {
+                  webcontroller.evaluateJavascript(
+                      source: "document.getElementsByTagName('header')[0].style.display='none'");
+                  webcontroller.evaluateJavascript(
+                      source:  "document.getElementsByTagName('footer')[0].style.display='none'");
+                  webcontroller.evaluateJavascript(
+                      source: "document.querySelector('#firstholder').style.display='none'");
+                  webcontroller.evaluateJavascript(
+                      source: "document.querySelector('#contnet > div > div > div.restrictMiddle > div > div.posts_load').style.display='none'");
+                  webcontroller.evaluateJavascript(
+                      source: "document.querySelector('#sortable2').style.display='none'");
+                  webcontroller.evaluateJavascript(
+                      source: 'document.querySelector("#post-textarea > div > textarea").click()');
+
+                  print('loading finished!');
+                  makeVisible();
+                  print('$isLoaded $isLoading');
+                }
             ),
           ),
-          Row(
-            children: [
-              ElevatedButton.icon(
-                style: small,
-                onPressed: () async {
-                  home.webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-photos").click()');
-                },
-                label: Text('Upload Photo'),
-                icon: Icon(Icons.image),
-              ),
-              ElevatedButton.icon(
-                style: small,
-                onPressed: () async {
-                  final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
-                },
-                label: Text('Take Picture'),
-                icon: Icon(Icons.camera),
-              ),
-              ElevatedButton.icon(
-                style: small,
-                onPressed: () async {
-                  final XFile? image = await _picker.pickVideo(source: ImageSource.gallery);
-                },
-                label: Text('Upload Video'),
-                icon: Icon(Icons.video_file),
-              ),
-            ],
-          )
+          isLoading ? Center(child: CircularProgressIndicator(),)
+              : Stack(),
         ],
       )
     );

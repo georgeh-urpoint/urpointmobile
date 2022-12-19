@@ -44,7 +44,11 @@ Future<void> loadUserData() async{
   userName = await prefs.getString('username')!;
   playerId = await prefs.getString('playerId')!;
   userId = await prefs.getString('userId')!;
+  if(prefs.getBool('storageSetting') == null){
+    prefs.setBool('storageSetting', true);
+  }
   storageSetting = await prefs.getBool('storageSetting')!;
+  print("storage is ${prefs.getBool('storageSetting')}");
   print("Username Loaded: $userName");
   print("account loaded successfully.");
   prefs.setBool('loggedIn', true);

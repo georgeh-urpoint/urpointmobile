@@ -27,8 +27,10 @@ class MainPage extends StatefulWidget {
   }
 }
 
-
 class _MainPageState extends State<MainPage> {
+
+  late final postPage = PostPage();
+
 
   late final dynamic isRedir;
 
@@ -193,6 +195,7 @@ class _MainPageState extends State<MainPage> {
       floatingActionButton: ExpandableFab(
         children: [
           FloatingActionButton.small(
+            heroTag: 'qrScan',
               child: const Icon(Icons.add_a_photo_outlined),
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -201,15 +204,17 @@ class _MainPageState extends State<MainPage> {
               }
           ),
           FloatingActionButton.small(
-            child: const Icon(Icons.add_box_rounded),
+            heroTag: 'qrGen',
+            child: const Icon(Icons.qr_code_2),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) {
                 return GenerateQRPage(url: globals.currentLink);
               }));
             },
           ),
-          FloatingActionButton(
-            child: const Text('Share Ur-Point'),
+          FloatingActionButton.small(
+            heroTag: 'post',
+            child: const Icon(Icons.add_box_rounded),
               onPressed: () {
                 home.webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-box-focus > div").style.display="block"');
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
