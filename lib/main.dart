@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -24,6 +25,7 @@ import 'package:web_view/globals.dart' as globals;
 import 'autoloadglobals.dart' as autoload;
 import 'package:web_view/HomeTab.dart' as home;
 import 'package:web_view/CardsUI.dart' as card;
+import 'package:http/http.dart' as http;
 
 Future<void> main() async {
 
@@ -118,6 +120,24 @@ class User {
   User(this.player_id, this.platform, this.userId, this.userName);
 }
 
+
+Future<void> getJSON() async {
+  final response = await http.get(Uri.parse('https://www.ur-point.com/requests.php?hash=bfdf327b0181fe243a04&f=update_data&user_id=0&before_post_id=3203&check_posts=false&hash_posts=false&_=1671669333743'));
+
+  if (response.statusCode == 200) {
+    // If the call to the server was successful, parse the JSON
+    var data = json.decode(response.body);
+    print(data);
+  } else {
+    // If that call was not successful, throw an error.
+    throw Exception('Failed to load JSON');
+  }
+}
+
+void run() async {
+  await getJSON();
+}
+
 class MyApp extends StatelessWidget {
 
   @override
@@ -139,6 +159,8 @@ class LoadingPage extends StatelessWidget {
         javascriptMode: JavascriptMode.unrestricted,
         initialUrl: 'https://www.ur-point.com/index.php',
         onWebViewCreated: (controller) async {
+          getJSON();
+
           var check = await autoload.loadData();
           print("Login Status: $check");
           if(check == false) {
@@ -437,7 +459,7 @@ class NavDrawerState extends State<NavDrawer> {
           ),
           ListTile(
             minVerticalPadding: 25,
-            leading: Image.asset('UrIcons/Ur-Business-P.png', fit: BoxFit.cover),
+            leading: Image.asset('UrIcons/ur-message.png', fit: BoxFit.cover),
             title: Text('Message'),
             onTap: () => {
             home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/ur-message'))),
@@ -446,7 +468,7 @@ class NavDrawerState extends State<NavDrawer> {
           ),
           ListTile(
             minVerticalPadding: 25,
-            leading: Image.asset('UrIcons/Ur-Groups-P.png', fit: BoxFit.cover),
+            leading: Image.asset('UrIcons/ur-groups.png', fit: BoxFit.cover),
             title: Text('Groups'),
             onTap: () => {
             home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/groups'))),
@@ -455,7 +477,7 @@ class NavDrawerState extends State<NavDrawer> {
           ),
           ListTile(
             minVerticalPadding: 25,
-            leading: Image.asset('UrIcons/Ur-Events-P.png', fit: BoxFit.cover),
+            leading: Image.asset('UrIcons/ur-events.jpg', fit: BoxFit.cover),
             title: Text('Events'),
             onTap: () => {
             home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/events'))),

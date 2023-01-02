@@ -44,8 +44,8 @@ class _ProfileTabState extends State<ProfileTab> with AutomaticKeepAliveClientMi
               ),
               body: TabBarView(
                 children: [
-                  Icon(Icons.account_circle),
                   profile.ProfilePage(),
+                  profile.TimelinePage(),
                 ],
                 physics: NeverScrollableScrollPhysics(),),
             )

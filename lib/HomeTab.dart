@@ -7,9 +7,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'globals.dart' as globals;
 import 'autoloadglobals.dart' as autoload;
 import 'main.dart' as main;
+import 'package:http/http.dart' as http;
 
 
-
+SharedPreferences prefs = SharedPreferences.getInstance() as SharedPreferences;
 late InAppWebViewController webcontroller;
 
 
@@ -30,6 +31,10 @@ class HomeTab extends StatefulWidget {
 }
 
 class HomeTabState extends State<HomeTab> {
+
+  late var getHashUrl;
+  var hashFunc;
+
 
   bool scrollButtonShow = false;
 
@@ -62,7 +67,33 @@ class HomeTabState extends State<HomeTab> {
     return MaterialApp(
       home: Scaffold(
           body: InAppWebView(
-              //Creates WebView
+              //Creates WebVie
+              androidShouldInterceptRequest: (webcontroller, request) async {
+                getHashUrl = await request.url;
+                var url = getHashUrl.toString();
+                if(url.contains('https://www.ur-point.com/requests.php?hash=')){
+                  print('hash found: $url');
+                  hashFunc = url;
+                  final response = await http.get(Uri.parse(url));
+                  print('response is: $response');
+                  final queryParams = response.request?.url.queryParameters;
+                  final hash = queryParams!['hash'];
+                  print('hash is: $hash');
+                  if(autoload.hash == null){
+                    autoload.hash = hash!;
+                  }
+                  if(prefs.containsKey('hash') == false){
+                    prefs.setString('hash', hash!);
+                  }
+                  print(prefs.getString('hash'));
+                  print('requesting: ${http.get(Uri.parse('https://www.ur-point.com/requests.php?hash=${autoload.hash}&f=update_data&user_id=0&before_post_id=3231&check_posts=false&hash_posts=false&_=1671804930902'))}');
+                }
+              },
+            initialOptions: InAppWebViewGroupOptions(
+              android: AndroidInAppWebViewOptions(
+                useShouldInterceptRequest: true,
+              )
+            ),
               initialUrlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com')),
               onWebViewCreated: (controller) {
                 webcontroller = controller;

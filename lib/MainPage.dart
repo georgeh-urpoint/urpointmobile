@@ -27,9 +27,13 @@ class MainPage extends StatefulWidget {
   }
 }
 
-class _MainPageState extends State<MainPage> {
+
+
+class _MainPageState extends State<MainPage>  with SingleTickerProviderStateMixin{
 
   late final postPage = PostPage();
+
+  bool _isExpanded = false;
 
 
   late final dynamic isRedir;
@@ -58,6 +62,31 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 200));
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _toggleExpand() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+      if (_isExpanded) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -67,6 +96,8 @@ class _MainPageState extends State<MainPage> {
       Text('Notifications Page Currently Unavailable. Check back soon!'),
       ProfileTab(),
     ];
+
+
 
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
@@ -195,7 +226,7 @@ class _MainPageState extends State<MainPage> {
       floatingActionButton: ExpandableFab(
         children: [
           FloatingActionButton.small(
-            heroTag: 'qrScan',
+              heroTag: 'qrScan',
               child: const Icon(Icons.add_a_photo_outlined),
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -213,8 +244,8 @@ class _MainPageState extends State<MainPage> {
             },
           ),
           FloatingActionButton.small(
-            heroTag: 'post',
-            child: const Icon(Icons.add_box_rounded),
+              heroTag: 'post',
+              child: const Icon(Icons.add_box_rounded),
               onPressed: () {
                 home.webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-box-focus > div").style.display="block"');
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -229,5 +260,5 @@ class _MainPageState extends State<MainPage> {
       ),
     );
   }
-
 }
+

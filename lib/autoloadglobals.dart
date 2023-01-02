@@ -10,6 +10,7 @@ import 'LoginPage.dart';
 String userName = '';
 String playerId = '';
 String userId = '';
+String hash = '';
 late bool storageSetting;
 bool hasRan = false;
 
