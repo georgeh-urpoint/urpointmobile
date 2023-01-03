@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
@@ -11,9 +13,9 @@ import 'HomeTab.dart' as home;
 import 'globals.dart' as globals;
 import 'package:web_view/MessageTab.dart' as message;
 import 'package:app_bar_with_search_switch/app_bar_with_search_switch.dart';
+import 'NotificationPage.dart';
 
 var selectedIndex = 0;
-
 
 class MainPage extends StatefulWidget {
   final link;
@@ -27,14 +29,41 @@ class MainPage extends StatefulWidget {
   }
 }
 
+class backgroundNetwork extends StatelessWidget {
+  late InAppWebViewController webController;
 
+  @override
+  Widget build(BuildContext context) {
+    Timer.periodic(Duration(seconds: 5), (timer) async {
+      var response = await webController.evaluateJavascript(
+          source:
+              "fetch('https://www.ur-point.com/requests.php?hash=${globals.hash}&f=update_data').then(response => response.json()).then(data => console.log(data));");
+      print("response recieved: $response");
+    });
 
-class _MainPageState extends State<MainPage>  with SingleTickerProviderStateMixin{
+    return Container(
+      child: InAppWebView(
+        initialUrlRequest:
+            URLRequest(url: Uri.parse('https://www.ur-point.com')),
+        onWebViewCreated: (InAppWebViewController controller) {
+          webController = controller;
+        },
+        onLoadStart: (controller, url) {
+          print('loading: $url');
+        },
+        onLoadStop: (controller, url) {
+          print('finished loading: $url');
+        },
+      ),
+    );
+  }
+}
 
+class _MainPageState extends State<MainPage>
+    with SingleTickerProviderStateMixin {
   late final postPage = PostPage();
 
   bool _isExpanded = false;
-
 
   late final dynamic isRedir;
 
@@ -53,11 +82,12 @@ class _MainPageState extends State<MainPage>  with SingleTickerProviderStateMixi
 
   get link => widget.link;
 
-  void _onNavTapped(int index){
-    if(selectedIndex == 0 && index == 0){
-      home.webcontroller.evaluateJavascript(source: "window.scrollTo({top: 0, behavior: 'smooth'});");
+  void _onNavTapped(int index) {
+    if (selectedIndex == 0 && index == 0) {
+      home.webcontroller.evaluateJavascript(
+          source: "window.scrollTo({top: 0, behavior: 'smooth'});");
     }
-    setState((){
+    setState(() {
       selectedIndex = index;
     });
   }
@@ -67,7 +97,8 @@ class _MainPageState extends State<MainPage>  with SingleTickerProviderStateMixi
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 200));
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 200));
   }
 
   @override
@@ -87,17 +118,19 @@ class _MainPageState extends State<MainPage>  with SingleTickerProviderStateMixi
     });
   }
 
+  late InAppWebViewController webController;
+
   @override
   Widget build(BuildContext context) {
-
     List<Widget> _pages = <Widget>[
-      home.HomeTab(isRedir: widget.isRedir, link: 'https://www.ur-point.com/index.php',),
+      home.HomeTab(
+        isRedir: widget.isRedir,
+        link: 'https://www.ur-point.com/index.php',
+      ),
       message.MessageTab(),
-      Text('Notifications Page Currently Unavailable. Check back soon!'),
+      NotiPage(),
       ProfileTab(),
     ];
-
-
 
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
@@ -110,104 +143,100 @@ class _MainPageState extends State<MainPage>  with SingleTickerProviderStateMixi
             label: 'Home',
           ),
           BottomNavigationBarItem(
-              icon: new Stack(
-                  children: <Widget>[
-                    new Icon(Icons.message),
-                    globals.msgNum != 0?
-                    new Positioned(
+              icon: new Stack(children: <Widget>[
+                new Icon(Icons.message),
+                globals.msgNum != 0
+                    ? new Positioned(
+                        right: 0,
+                        child: new Container(
+                            padding: EdgeInsets.all(1),
+                            decoration: new BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            constraints: BoxConstraints(
+                              minWidth: 12,
+                              minHeight: 12,
+                            ),
+                            child: globals.msgNum < 9
+                                ? new Text(
+                                    '${globals.msgNum}',
+                                    style: new TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  )
+                                : new Text('9+',
+                                    style: new TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                    ),
+                                    textAlign: TextAlign.center)),
+                      )
+                    : SizedBox.shrink()
+              ]),
+              label: 'Chat'),
+          BottomNavigationBarItem(
+            icon: new Stack(children: <Widget>[
+              new Icon(Icons.notifications),
+              globals.notifNum != 0
+                  ? new Positioned(
                       right: 0,
                       child: new Container(
-                        padding: EdgeInsets.all(1),
-                        decoration: new BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        constraints: BoxConstraints(
-                          minWidth: 12,
-                          minHeight: 12,
-                        ),
-                        child: globals.msgNum < 9?new Text(
-                          '${globals.msgNum}',
-                          style: new TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
+                          padding: EdgeInsets.all(1),
+                          decoration: new BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                          textAlign: TextAlign.center,
-                        ):
-                            new Text('9+',
-                            style: new TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                            ),
-                            textAlign: TextAlign.center)
-                      ),
-                    ):
-                    SizedBox.shrink()
-                  ]
-              ),
-              label: 'Chat'
+                          constraints: BoxConstraints(
+                            minWidth: 12,
+                            minHeight: 12,
+                          ),
+                          child: globals.notifNum < 9
+                              ? new Text(
+                                  '${globals.notifNum}',
+                                  style: new TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                )
+                              : new Text('9+',
+                                  style: new TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                  ),
+                                  textAlign: TextAlign.center)),
+                    )
+                  : SizedBox.shrink()
+            ]),
+            label: 'Notifications',
           ),
-    BottomNavigationBarItem(
-      icon: new Stack(
-        children: <Widget>[
-          new Icon(Icons.notifications),
-          globals.notifNum != 0?
-          new Positioned(
-            right: 0,
-            child: new Container(
-              padding: EdgeInsets.all(1),
-              decoration: new BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              constraints: BoxConstraints(
-                minWidth: 12,
-                minHeight: 12,
-              ),
-              child: globals.notifNum < 9?new Text(
-                '${globals.notifNum}',
-                style: new TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                ),
-                textAlign: TextAlign.center,
-              ):
-              new Text('9+',
-                  style: new TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                  ),
-                  textAlign: TextAlign.center)
-            ),
-          ):
-          SizedBox.shrink()
-  ]
-      ),
-      label: 'Notifications',
-    ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle),
-              label: 'Profile')
+              icon: Icon(Icons.account_circle), label: 'Profile')
         ],
         currentIndex: selectedIndex,
         onTap: _onNavTapped,
       ),
       drawer: NavDrawer(),
       appBar: AppBarWithSearchSwitch(
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Colors.deepPurple
-        ),
+        systemOverlayStyle:
+            SystemUiOverlayStyle(statusBarColor: Colors.deepPurple),
         fieldHintText: 'Search Groups',
         keepAppBarColors: true,
         backgroundColor: Colors.deepPurple,
         customTextEditingController: textController,
-        onSubmitted: (value){
+        onSubmitted: (value) {
           selectedIndex = 0;
-          home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/search?query=$value')));
+          home.webcontroller.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      'https://www.ur-point.com/search?query=$value')));
         },
         appBarBuilder: (BuildContext context) {
           return AppBar(
-            toolbarHeight: 50,
+              toolbarHeight: 50,
               title: SizedBox(
                 height: kToolbarHeight,
                 child: Image.asset('assets/urpointlogo.png', fit: BoxFit.fill),
@@ -218,10 +247,9 @@ class _MainPageState extends State<MainPage>  with SingleTickerProviderStateMixi
                 AppBarSearchButton(
                   searchActiveButtonColor: Colors.purple,
                 )
-              ]
-          );
-      },
-          ),
+              ]);
+        },
+      ),
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
         children: [
@@ -232,8 +260,7 @@ class _MainPageState extends State<MainPage>  with SingleTickerProviderStateMixi
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
                   return CameraPage();
                 }));
-              }
-          ),
+              }),
           FloatingActionButton.small(
             heroTag: 'qrGen',
             child: const Icon(Icons.qr_code_2),
@@ -247,7 +274,9 @@ class _MainPageState extends State<MainPage>  with SingleTickerProviderStateMixi
               heroTag: 'post',
               child: const Icon(Icons.add_box_rounded),
               onPressed: () {
-                home.webcontroller.evaluateJavascript(source: 'document.querySelector("#publisher-box-focus > div").style.display="block"');
+                home.webcontroller.evaluateJavascript(
+                    source:
+                        'document.querySelector("#publisher-box-focus > div").style.display="block"');
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
                   return PostPage();
                 }));
@@ -261,4 +290,3 @@ class _MainPageState extends State<MainPage>  with SingleTickerProviderStateMixi
     );
   }
 }
-

@@ -169,7 +169,7 @@ class LoadingPage extends StatelessWidget {
             ));
           } else{
             Navigator.pushReplacement(context, new MaterialPageRoute(
-                builder: (context) => new MainPage(isRedir: false,)
+                builder: (context) => new MainPage(isRedir: false)
             ));
           }
       },
@@ -182,6 +182,7 @@ class LoadingPage extends StatelessWidget {
   }
 
 }
+
 
 
 class CameraPage extends StatefulWidget {

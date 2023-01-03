@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'autoloadglobals.dart' as globals;
 import 'package:web_view/ProfilePage.dart' as profile;
+import 'NotificationPage.dart' as notifs;
 
 class ProfileTab extends StatefulWidget {
   @override
