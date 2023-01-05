@@ -3,6 +3,7 @@ library my_prj.globals;
 import 'package:flutter/material.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web_view/main.dart';
 
 import 'LoginPage.dart';
 
@@ -11,7 +12,7 @@ String userName = '';
 String playerId = '';
 String userId = '';
 String hash = '';
-late bool storageSetting;
+bool storageSetting = true;
 bool hasRan = false;
 
 Future<bool> loadData() async{
@@ -66,7 +67,9 @@ void logOut(BuildContext context) async{
   playerId = '';
   prefs.setBool('loggedIn', false);
   print("User Logged Out");
+  Navigator.of(context).popUntil((route) => route.isFirst);
   Navigator.pushReplacement(context, new MaterialPageRoute(
-      builder: (context) => new LoginPage()
+      builder: (context) => new SplashPage()
   ));
+  showToast('Successfully Logged Out.');
 }

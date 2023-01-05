@@ -28,7 +28,6 @@ import 'package:web_view/CardsUI.dart' as card;
 import 'package:http/http.dart' as http;
 
 Future<void> main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
 
   //Initialising Firebase.
@@ -49,7 +48,8 @@ Future<void> main() async {
 
   var platform = getPlatform();
   print("platform is $platform");
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+      overlays: [SystemUiOverlay.top]);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     systemNavigationBarColor: Colors.deepPurple, // navigation bar color
     statusBarColor: Colors.deepPurple, // status bar color
@@ -60,7 +60,7 @@ Future<void> main() async {
 // Function to get the users platform
 // Used by UrPoint to get OneSignal notifications working.
 
-String getPlatform(){
+String getPlatform() {
   var platform;
   if (Platform.isAndroid) {
     platform = "android";
@@ -70,19 +70,18 @@ String getPlatform(){
   return platform;
 }
 
-bool hideAppBar(){
+bool hideAppBar() {
   var platform = getPlatform();
-  if(platform == "IOS"){
+  if (platform == "IOS") {
     return false;
   }
-  if(platform == "android"){
+  if (platform == "android") {
     return true;
   }
-  throw"platform not found";
+  throw "platform not found";
 }
 
 Future<String> getUserInfo(var userid) async {
-
   // Gets the user platform
   var platform = getPlatform();
 
@@ -90,7 +89,7 @@ Future<String> getUserInfo(var userid) async {
   await Future.doWhile(() async {
     var status = await OneSignal.shared.getDeviceState();
     String? osUserID = status?.userId;
-    if(osUserID == null){
+    if (osUserID == null) {
       return true;
     } else {
       return false;
@@ -101,12 +100,13 @@ Future<String> getUserInfo(var userid) async {
   String? playerId = osUserID;
 
   //Creates a class of the user info
-  if(playerId == null){
+  if (playerId == null) {
     playerId = "null";
   }
 
   //Generates URL to send info to UrPoint website.
-  var url = "https://www.ur-point.com/firestore.php?userid=$userid&platform=$platform&playerid=$playerId";
+  var url =
+      "https://www.ur-point.com/firestore.php?userid=$userid&platform=$platform&playerid=$playerId";
   print("get url here $url");
   return url;
 }
@@ -120,9 +120,9 @@ class User {
   User(this.player_id, this.platform, this.userId, this.userName);
 }
 
-
 Future<void> getJSON() async {
-  final response = await http.get(Uri.parse('https://www.ur-point.com/requests.php?hash=bfdf327b0181fe243a04&f=update_data&user_id=0&before_post_id=3203&check_posts=false&hash_posts=false&_=1671669333743'));
+  final response = await http.get(Uri.parse(
+      'https://www.ur-point.com/requests.php?hash=bfdf327b0181fe243a04&f=update_data&user_id=0&before_post_id=3203&check_posts=false&hash_posts=false&_=1671669333743'));
 
   if (response.statusCode == 200) {
     // If the call to the server was successful, parse the JSON
@@ -139,14 +139,13 @@ void run() async {
 }
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(colorSchemeSeed: Colors.blue),
-        home: LoadingPage(),
-      );
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(colorSchemeSeed: Colors.blue),
+      home: LoadingPage(),
+    );
   }
 }
 
@@ -163,27 +162,23 @@ class LoadingPage extends StatelessWidget {
 
           var check = await autoload.loadData();
           print("Login Status: $check");
-          if(check == false) {
-            Navigator.pushReplacement(context, new MaterialPageRoute(
-                builder: (context) => new LoginPage()
-            ));
-          } else{
-            Navigator.pushReplacement(context, new MaterialPageRoute(
-                builder: (context) => new MainPage(isRedir: false)
-            ));
+          if (check == false) {
+            Navigator.pushReplacement(context,
+                new MaterialPageRoute(builder: (context) => new SplashPage()));
+          } else {
+            Navigator.pushReplacement(
+                context,
+                new MaterialPageRoute(
+                    builder: (context) => new MainPage(isRedir: false)));
           }
-      },
+        },
         onPageStarted: (url) {
           print(url);
-        }
-        ,
+        },
       ),
     );
   }
-
 }
-
-
 
 class CameraPage extends StatefulWidget {
   @override
@@ -244,18 +239,18 @@ class _CameraPageState extends State<CameraPage> {
                 final String code = barcode.rawValue!;
                 debugPrint('Barcode found! $code');
                 print("context");
-                if(code.contains(new RegExp(r'www.ur-point.com/', caseSensitive: false))) {
-                  Navigator.pushReplacement(context, new MaterialPageRoute(
-                      builder: (context) => new MainPage(
-                          isRedir: true, link: code)));
+                if (code.contains(
+                    new RegExp(r'www.ur-point.com/', caseSensitive: false))) {
+                  Navigator.pushReplacement(
+                      context,
+                      new MaterialPageRoute(
+                          builder: (context) =>
+                              new MainPage(isRedir: true, link: code)));
                 }
               }
-                }));
-            }
+            }));
   }
-
-
-
+}
 
 class GenerateQRPage extends StatefulWidget {
   late final url;
@@ -271,20 +266,18 @@ class _GenerateQRPageState extends State<GenerateQRPage> {
   TextEditingController controller = TextEditingController();
   final key = GlobalKey();
 
-
   File? file;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('QR GENERATOR'),
-        backgroundColor: Colors.purple,
-      ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+        appBar: AppBar(
+          title: Text('QR GENERATOR'),
+          backgroundColor: Colors.purple,
+        ),
+        body: SingleChildScrollView(
+          child: Center(
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               RepaintBoundary(
                 key: key,
                 child: Container(
@@ -295,24 +288,24 @@ class _GenerateQRPageState extends State<GenerateQRPage> {
                     padding: EdgeInsets.all(16),
                     backgroundColor: Colors.white,
                     embeddedImage: AssetImage('assets/QrEmbedUrPoint.png'),
-                    embeddedImageStyle: QrEmbeddedImageStyle(
-                        size: Size(80, 80)
-                    ),
-                  ),
+                    embeddedImageStyle:
+                        QrEmbeddedImageStyle(size: Size(80, 80)),
                   ),
                 ),
+              ),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple
-                ),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.purple),
                   onPressed: () async {
-                    RenderRepaintBoundary boundary =
-                      key.currentContext?.findRenderObject() as RenderRepaintBoundary;
+                    RenderRepaintBoundary boundary = key.currentContext
+                        ?.findRenderObject() as RenderRepaintBoundary;
                     var image = await boundary.toImage();
-                    ByteData byteData = await image.toByteData(format: ImageByteFormat.png) as ByteData;
+                    ByteData byteData = await image.toByteData(
+                        format: ImageByteFormat.png) as ByteData;
                     Uint8List pngBytes = byteData.buffer.asUint8List();
                     final tempDir = await getTemporaryDirectory();
-                    final file = await new File('${tempDir.path}/image.png').create();
+                    final file =
+                        await new File('${tempDir.path}/image.png').create();
                     await file.writeAsBytes(pngBytes);
                     showToast("QR Saved Successfully");
                     print("qr saved");
@@ -322,37 +315,35 @@ class _GenerateQRPageState extends State<GenerateQRPage> {
                   onPressed: () async {
                     final tempDir = await getTemporaryDirectory();
                     var path = XFile('${tempDir.path}/image.png');
-                    Share.shareXFiles([path], text: "You have been invited to join my photo booth on UrPoint. Click the link or scan the QR code to join. ${widget.url}");
+                    Share.shareXFiles([path],
+                        text:
+                            "You have been invited to join my photo booth on UrPoint. Click the link or scan the QR code to join. ${widget.url}");
                   },
                   child: Text('Share QR Invite'))
-          ]
+            ]),
           ),
-        ),
-      )
-    );
+        ));
   }
 }
-void showToast(String message){
+
+void showToast(String message) {
   Fluttertoast.showToast(
-    msg: message,
-    toastLength: Toast.LENGTH_LONG,
-    gravity: ToastGravity.BOTTOM,
-    timeInSecForIosWeb: 1,
-    backgroundColor: Colors.green,
-    textColor: Colors.white,
-    fontSize: 16.0
-  );
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.green,
+      textColor: Colors.white,
+      fontSize: 16.0);
 }
 
 Future<void> writeToFile(ByteData data, String path) async {
   final buffer = data.buffer;
-  await File(path).writeAsBytes(
-      buffer.asUint8List(data.offsetInBytes, data.lengthInBytes)
-  );
+  await File(path)
+      .writeAsBytes(buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
 }
 
 Future<String> createQrCode(String url) async {
-
   var painter = await paintQr(url);
 
   final appDir = await getTemporaryDirectory();
@@ -360,12 +351,13 @@ Future<String> createQrCode(String url) async {
   var time = DateTime.now();
   String path = '$tempPath/$time.png';
   var picData = await painter.toImageData(2048, format: ImageByteFormat.png);
-  if(picData != null){
+  if (picData != null) {
     print("$picData is here");
     writeToFile(picData, path);
   }
   return path;
 }
+
 Future<QrPainter> paintQr(String url) async {
   final painter = await QrPainter(
     data: url,
@@ -374,9 +366,7 @@ Future<QrPainter> paintQr(String url) async {
   return painter;
 }
 
-
 class NavDrawer extends StatefulWidget {
-
   NavDrawerState createState() {
     return NavDrawerState();
   }
@@ -385,21 +375,20 @@ class NavDrawer extends StatefulWidget {
 class NavDrawerState extends State<NavDrawer> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-
-
   bool forAndroid = autoload.storageSetting;
 
   late String labelText;
 
   @override
   Widget build(BuildContext context) {
+    final ButtonStyle style = ElevatedButton.styleFrom(
+        backgroundColor: Colors.purpleAccent,
+        textStyle: TextStyle(fontSize: 12));
 
-    final ButtonStyle style = ElevatedButton.styleFrom(backgroundColor: Colors.purpleAccent, textStyle: TextStyle(fontSize: 12));
-
-    if(forAndroid == true){
+    if (forAndroid == true) {
       labelText = "All Posts will be Kept";
     }
-    if(forAndroid == false){
+    if (forAndroid == false) {
       labelText = 'Posts will expire after 7 days.';
     }
 
@@ -410,60 +399,36 @@ class NavDrawerState extends State<NavDrawer> {
           DrawerHeader(
             child: Text(
               'Welcome to Ur Point, ${autoload.userName}',
-              style: new TextStyle(
-                fontSize: 20.0,
-                color: Colors.white
-              ),
+              style: new TextStyle(fontSize: 20.0, color: Colors.white),
             ),
             decoration: BoxDecoration(
                 color: Colors.deepPurple,
-                image: DecorationImage(
-                    fit: BoxFit.fill,
-                    image: AssetImage(''))),
+                image:
+                    DecorationImage(fit: BoxFit.fill, image: AssetImage(''))),
           ),
           ListTile(
             minVerticalPadding: 25,
-            leading: Image.asset('UrIcons/Ur-Photobooth-P.png', fit: BoxFit.cover),
+            leading:
+                Image.asset('UrIcons/Ur-Photobooth-P.png', fit: BoxFit.cover),
             title: Text('Photo Booth'),
             onTap: () => {
-            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/ur-photo-booth'))),
+              home.webcontroller.loadUrl(
+                  urlRequest: URLRequest(
+                      url: Uri.parse(
+                          'https://www.ur-point.com/ur-photo-booth'))),
               print(globals.currentLink),
               Navigator.pop(context),
             },
           ),
           ListTile(
             minVerticalPadding: 25,
-            leading: Image.asset('UrIcons/Ur-Photos-P.png', fit: BoxFit.cover),
-            title: Text('Photos'),
-            onTap: () => {
-            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/ur-photos'))),
-              Navigator.pop(context),
-            },
-          ),
-          ListTile(
-            minVerticalPadding: 25,
-            leading: Image.asset('UrIcons/Ur-Videos-P.png', fit: BoxFit.cover),
-            title: Text('Videos'),
-            onTap: () => {
-            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/ur-videos'))),
-              Navigator.pop(context)
-            },
-          ),
-          ListTile(
-            minVerticalPadding: 25,
-            leading: Image.asset('UrIcons/Ur-Business-P.png', fit: BoxFit.cover),
+            leading:
+                Image.asset('UrIcons/Ur-Business-P.png', fit: BoxFit.cover),
             title: Text('Business'),
             onTap: () => {
-            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/ur-business'))),
-              Navigator.pop(context)
-            },
-          ),
-          ListTile(
-            minVerticalPadding: 25,
-            leading: Image.asset('UrIcons/ur-message.png', fit: BoxFit.cover),
-            title: Text('Message'),
-            onTap: () => {
-            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/ur-message'))),
+              home.webcontroller.loadUrl(
+                  urlRequest: URLRequest(
+                      url: Uri.parse('https://www.ur-point.com/ur-business'))),
               Navigator.pop(context)
             },
           ),
@@ -472,7 +437,9 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/ur-groups.png', fit: BoxFit.cover),
             title: Text('Groups'),
             onTap: () => {
-            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/groups'))),
+              home.webcontroller.loadUrl(
+                  urlRequest: URLRequest(
+                      url: Uri.parse('https://www.ur-point.com/groups'))),
               Navigator.pop(context)
             },
           ),
@@ -481,7 +448,9 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/ur-events.jpg', fit: BoxFit.cover),
             title: Text('Events'),
             onTap: () => {
-            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/events'))),
+              home.webcontroller.loadUrl(
+                  urlRequest: URLRequest(
+                      url: Uri.parse('https://www.ur-point.com/events'))),
               Navigator.pop(context)
             },
           ),
@@ -490,10 +459,61 @@ class NavDrawerState extends State<NavDrawer> {
             leading: Image.asset('UrIcons/Ur-Cards-P.png', fit: BoxFit.cover),
             title: Text('Cards'),
             onTap: () => {
-            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-cards.com/'))),
+              home.webcontroller.loadUrl(
+                  urlRequest:
+                      URLRequest(url: Uri.parse('https://www.ur-cards.com/'))),
               Navigator.pop(context),
               card.CardPage(),
             },
+          ),
+          ListTile(
+            minVerticalPadding: 25,
+            leading: Image.asset('UrIcons/ur-message.png', fit: BoxFit.cover),
+            title: Text('Message'),
+            trailing: Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(child: Icon(Icons.lock)),
+                  TextSpan(text: 'Upgrade'),
+                ],
+              ),
+            ),
+            onTap: () => {
+              home.webcontroller.loadUrl(
+                  urlRequest: URLRequest(
+                      url: Uri.parse('https://www.ur-point.com/ur-message'))),
+              Navigator.pop(context)
+            },
+          ),
+          ListTile(
+            minVerticalPadding: 25,
+            leading: Image.asset('UrIcons/Ur-Photos-P.png', fit: BoxFit.cover),
+            title: Text('Photos'),
+            trailing: Text('Membership Required.'),
+            onTap: () => {
+              home.webcontroller.loadUrl(
+                  urlRequest: URLRequest(
+                      url: Uri.parse('https://www.ur-point.com/ur-photos'))),
+              Navigator.pop(context),
+            },
+          ),
+          ListTile(
+            minVerticalPadding: 25,
+            leading: Image.asset('UrIcons/Ur-Videos-P.png', fit: BoxFit.cover),
+            title: Text('Videos'),
+            trailing: Text('Membership Required.'),
+            onTap: () => {
+              home.webcontroller.loadUrl(
+                  urlRequest: URLRequest(
+                      url: Uri.parse('https://www.ur-point.com/ur-videos'))),
+              Navigator.pop(context)
+            },
+          ),
+          ListTile(
+            minVerticalPadding: 25,
+            leading: Text('test'),
+            title: Text('test login'),
+            onTap: () => {globals.logIn()},
           ),
           ListTile(
             minVerticalPadding: 25,
@@ -504,7 +524,8 @@ class NavDrawerState extends State<NavDrawer> {
                 context: context,
                 builder: (ctx) => AlertDialog(
                   title: const Text("Really Log Out?"),
-                  content: const Text("Are you sure you want to log out? Your account details will not be saved."),
+                  content: const Text(
+                      "Are you sure you want to log out? Your account details will not be saved."),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () {
@@ -518,7 +539,10 @@ class NavDrawerState extends State<NavDrawer> {
                     ),
                     TextButton(
                       onPressed: () {
-                        home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/logout')));
+                        home.webcontroller.loadUrl(
+                            urlRequest: URLRequest(
+                                url: Uri.parse(
+                                    'https://www.ur-point.com/logout')));
                         autoload.logOut(context);
                       },
                       child: Container(
@@ -533,67 +557,69 @@ class NavDrawerState extends State<NavDrawer> {
             },
           ),
           Container(
-            width: 42.0,
-            height: 136.0,
-            child: DecoratedBox(
-              decoration: BoxDecoration(border:
-              Border.all(color: Colors.black),
-                  color: Colors.white
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text('Storage', style: new TextStyle(
-                          fontSize: 20.0,
-                          color: Colors.purple
-                        ),),
-                        Switch(
-                            activeColor: Colors.purple,
-                            activeTrackColor: Colors.black,
-                            inactiveThumbColor: Colors.purple,
-                            inactiveTrackColor: Colors.black26,
-                            splashRadius: 50.0,
-                            // boolean variable value
-                            value: forAndroid,
-                            // changes the state of the switch
-                            onChanged: (value) async {
-                              final SharedPreferences prefs = await _prefs;
-                              setState(() {
-                                prefs.setBool('storageSetting', value);
-                                print(prefs.getBool('storageSetting'));
-                                home.webcontroller.evaluateJavascript(source: '\$( "#toggleSwitch" ).click()');
-                                forAndroid = value;
-                                print('changed storage to $value');
-                              });
-                            }
+              width: 42.0,
+              height: 136.0,
+              child: DecoratedBox(
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      color: Colors.white),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Storage',
+                              style: new TextStyle(
+                                  fontSize: 20.0, color: Colors.purple),
+                            ),
+                            Switch(
+                                activeColor: Colors.purple,
+                                activeTrackColor: Colors.black,
+                                inactiveThumbColor: Colors.purple,
+                                inactiveTrackColor: Colors.black26,
+                                splashRadius: 50.0,
+                                // boolean variable value
+                                value: forAndroid,
+                                // changes the state of the switch
+                                onChanged: (value) async {
+                                  final SharedPreferences prefs = await _prefs;
+                                  setState(() {
+                                    prefs.setBool('storageSetting', value);
+                                    print(prefs.getBool('storageSetting'));
+                                    home.webcontroller.evaluateJavascript(
+                                        source:
+                                            '\$( "#toggleSwitch" ).click()');
+                                    forAndroid = value;
+                                    print('changed storage to $value');
+                                  });
+                                }),
+                            Text(
+                              labelText,
+                              style: TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                home.webcontroller.loadUrl(
+                                    urlRequest: URLRequest(
+                                        url: Uri.parse(
+                                            'https://www.ur-point.com/upgrade')));
+                                Navigator.pop(context);
+                              },
+                              style: style,
+                              child: const Text('Upgrade'),
+                            ),
+                          ],
                         ),
-                        Text(labelText,
-                          style: TextStyle(
-                            fontSize: 18,
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            home.webcontroller.loadUrl(urlRequest: URLRequest(url: Uri.parse('https://www.ur-point.com/upgrade')));
-                            Navigator.pop(context);
-                          },
-                          style: style,
-                          child: const Text('Upgrade'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              )
-            )
-          ),
+                      ),
+                    ],
+                  ))),
         ],
       ),
     );
   }
 }
-

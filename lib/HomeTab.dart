@@ -13,6 +13,7 @@ import 'main.dart' as main;
 import 'package:http/http.dart' as http;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+CookieManager cookieManager = CookieManager.instance();
 
 SharedPreferences prefs = SharedPreferences.getInstance() as SharedPreferences;
 
@@ -123,6 +124,8 @@ class HomeTabState extends State<HomeTab> {
                     if(url.contains('https://www.ur-point.com/requests.php?hash=') && globals.hashGot == false) {
                       print('hash found: $url');
                       hashFunc = url;
+                      Cookie? cookie = await cookieManager.getCookie(url: Uri.parse(url), name: 'cookie');
+                      print('cookie value is ${cookie!.value}');
                       final response = await http.get(Uri.parse(url));
                       print('response is: $response');
                       final queryParams = response.request?.url.queryParameters;
